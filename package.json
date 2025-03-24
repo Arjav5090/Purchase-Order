@@ -4,12 +4,12 @@
   "version": "2.0.1",
   "type": "module",
   "homepage": "https://Arjav5090.github.io/Purchase-Order",
-
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.15",
