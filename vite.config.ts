@@ -15,5 +15,5 @@ export default defineConfig({
       },
     }),
   ],
-    base: '/Purchase-Order',
+    base: '/',
 });
