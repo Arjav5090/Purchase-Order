@@ -153,7 +153,7 @@ export default function Home() {
   };
 
   const generatePdf = async () => {
-    const existingPdfBytes = await fetch(`${import.meta.env.BASE_URL}company-template.pdf`).then((res) =>
+    const existingPdfBytes = await fetch(`${import.meta.env.BASE_URL}/company-template.pdf`).then((res) =>
       res.arrayBuffer()
     );
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
