@@ -251,10 +251,10 @@ export default function Home() {
 
     drawHighlightedText(formData.date1, 65, 476);
     drawHighlightedText(formData.time1, 122, 476);
-    drawHighlightedText(formData.date3, 65, 462);
-    drawHighlightedText(formData.time3, 122, 462);
-    drawHighlightedText(formData.date2, 190, 476);
-    drawHighlightedText(formData.time2, 250, 476);
+    drawHighlightedText(formData.date2, 65, 462);
+    drawHighlightedText(formData.time2, 122, 462);
+    drawHighlightedText(formData.date3, 190, 476);
+    drawHighlightedText(formData.time3, 250, 476);
     
     drawHighlightedText(formData.date4, 190, 462);
     drawHighlightedText(formData.time4, 250, 462);
