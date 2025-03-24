@@ -4,7 +4,6 @@ import svgr from "vite-plugin-svgr";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/Purchase-Order/', 
   plugins: [
     react(),
     svgr({
@@ -16,4 +15,5 @@ export default defineConfig({
       },
     }),
   ],
+    base: '/Purchase-Order',
 });
