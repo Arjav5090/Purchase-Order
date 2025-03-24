@@ -251,10 +251,11 @@ export default function Home() {
 
     drawHighlightedText(formData.date1, 65, 476);
     drawHighlightedText(formData.time1, 122, 476);
-    drawHighlightedText(formData.date2, 65, 462);
-    drawHighlightedText(formData.time2, 122, 462);
-    drawHighlightedText(formData.date3, 190, 476);
-    drawHighlightedText(formData.time3, 250, 476);
+    drawHighlightedText(formData.date3, 65, 462);
+    drawHighlightedText(formData.time3, 122, 462);
+    drawHighlightedText(formData.date2, 190, 476);
+    drawHighlightedText(formData.time2, 250, 476);
+    
     drawHighlightedText(formData.date4, 190, 462);
     drawHighlightedText(formData.time4, 250, 462);
 
@@ -354,6 +355,16 @@ export default function Home() {
         pdfDoc.addPage(page);
       });
     }
+    if (formData.vendorQuoteYes && uploadedQuotePdf) {
+      const quoteBytes = await uploadedQuotePdf.arrayBuffer();
+      const quotePdf = await PDFDocument.load(quoteBytes);
+      const quotePages = await pdfDoc.copyPages(quotePdf, quotePdf.getPageIndices());
+    
+      quotePages.forEach((page) => {
+        pdfDoc.addPage(page);
+      });
+    }
+    
 
     form.flatten();
     const pdfBytes = await pdfDoc.save();
@@ -704,45 +715,15 @@ export default function Home() {
               </div>
               <div className="flex flex-col space-y-1.5">
                 <label
-                  htmlFor="date2"
+                  htmlFor="date3"
                   className="text-xs font-medium text-gray-700 dark:text-gray-300"
                 >
                   3) Date
                 </label>
                 <Input
-                  id="date2"
-                  name="date2"
-                  placeholder="3) Date"
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <label
-                  htmlFor="time2"
-                  className="text-xs font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Time
-                </label>
-                <Input
-                  id="time2"
-                  name="time2"
-                  placeholder="Time"
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <label
-                  htmlFor="date3"
-                  className="text-xs font-medium text-gray-700 dark:text-gray-300"
-                >
-                  2) Date
-                </label>
-                <Input
                   id="date3"
                   name="date3"
-                  placeholder="2) Date"
+                  placeholder="3) Date"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
@@ -757,6 +738,36 @@ export default function Home() {
                 <Input
                   id="time3"
                   name="time3"
+                  placeholder="Time"
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <label
+                  htmlFor="date2"
+                  className="text-xs font-medium text-gray-700 dark:text-gray-300"
+                >
+                  2) Date
+                </label>
+                <Input
+                  id="date2"
+                  name="date2"
+                  placeholder="2) Date"
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <label
+                  htmlFor="time2"
+                  className="text-xs font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Time
+                </label>
+                <Input
+                  id="time2"
+                  name="time2"
                   placeholder="Time"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
