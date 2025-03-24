@@ -153,7 +153,7 @@ export default function Home() {
   };
 
   const generatePdf = async () => {
-    const existingPdfBytes = await fetch("/company-template.pdf").then((res) =>
+    const existingPdfBytes = await fetch(`${import.meta.env.BASE_URL}company-template.pdf`).then((res) =>
       res.arrayBuffer()
     );
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -318,7 +318,7 @@ export default function Home() {
     draw(formData.signDate, 270, 28);
 
     if (formData.taxExemptYes) {
-      const extraPdfBytes = await fetch("/tax-exempt.pdf").then((res) =>
+      const extraPdfBytes = await fetch(`${import.meta.env.BASE_URL}/tax-exempt.pdf`).then((res) =>
         res.arrayBuffer()
       );
       const extraPdf = await PDFDocument.load(extraPdfBytes);
