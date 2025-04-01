@@ -309,12 +309,7 @@ const AppSidebar: React.FC = () => {
                 <span className="font-medium text-xl text-brand-500 dark:text-white">Grade Construction</span>
             </>
           ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <span className="font-medium text-xl text-brand-500 dark:text-white">GC</span>
           )}
         </Link>
       </div>
