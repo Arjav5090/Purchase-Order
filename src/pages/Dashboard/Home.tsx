@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import Input from "../../components/form/input/InputField";
@@ -151,7 +151,29 @@ export default function Home() {
     }
     setFormData({ ...formData, lineItems: updatedItems });
   };
-
+  
+  useEffect(() => {
+    // Calculate Subtotal (sum of all line item totals)
+    const subtotal = formData.lineItems.reduce((acc, item) => {
+      return acc + (parseFloat(item.total) || 0);
+    }, 0);
+  
+    // Ensure delivery, salesTax, and other default to 0 unless user changes them
+    const delivery = parseFloat(formData.delivery) || 0;
+    const salesTax = parseFloat(formData.salesTax) || 0;
+    const other = parseFloat(formData.bottomOther) || 0;
+  
+    // Calculate Grand Total
+    const grandTotal = subtotal + delivery + salesTax + other;
+  
+    // Update formData with new calculated values
+    setFormData((prevState) => ({
+      ...prevState,
+      subtotal: subtotal.toFixed(2),
+      grandTotal: grandTotal.toFixed(2),
+    }));
+  }, [formData.lineItems, formData.delivery, formData.salesTax, formData.bottomOther]);
+  
   const generatePdf = async () => {
     const existingPdfBytes = await fetch(`${import.meta.env.BASE_URL}/company-template.pdf`).then((res) =>
       res.arrayBuffer()
@@ -309,11 +331,11 @@ export default function Home() {
       draw(item.payItem, 560, y);
     });
 
-    draw(formData.subtotal, 335, 123);
-    draw(formData.delivery, 335, 108);
-    draw(formData.salesTax, 335, 93);
-    draw(formData.bottomOther, 335, 78);
-    draw(formData.grandTotal, 335, 63);
+    draw(`$${formData.subtotal}`, 335, 123);
+    draw(`$${formData.delivery}`, 335, 108);
+    draw(`$${formData.salesTax}`, 335, 93);
+    draw(`$${formData.bottomOther}`, 335, 78);
+    draw(`$${formData.grandTotal}`, 335, 63);
 
     draw(formData.sign, 33, 28);
     draw(formData.signDate, 270, 28);
@@ -1512,6 +1534,8 @@ export default function Home() {
               id="subtotal"
               name="subtotal"
               placeholder="Subtotal"
+              value={formData.subtotal}
+              disabled
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -1528,6 +1552,7 @@ export default function Home() {
               id="delivery"
               name="delivery"
               placeholder="Delivery"
+              value={formData.delivery}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -1544,6 +1569,7 @@ export default function Home() {
               id="salesTax"
               name="salesTax"
               placeholder="Sales Tax"
+              value={formData.salesTax}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -1560,6 +1586,7 @@ export default function Home() {
               id="bottomOther"
               name="bottomOther"
               placeholder="Other"
+              value={formData.bottomOther}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -1575,7 +1602,9 @@ export default function Home() {
             <Input
               id="grandTotal"
               name="grandTotal"
+              value={formData.grandTotal}
               placeholder="Grand Total"
+              disabled
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
