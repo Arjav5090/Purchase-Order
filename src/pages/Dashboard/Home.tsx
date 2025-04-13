@@ -3,6 +3,9 @@ import PageMeta from "../../components/common/PageMeta";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import Input from "../../components/form/input/InputField";
 import Select from "../../components/form/Select";
+import { Modal } from "../../components/ui/modal";
+import AddVendorModalContent from "./Modal";
+import { format, parse } from 'date-fns';
 
 const downloadBlob = (blob: Blob, fileName: string) => {
   const url = URL.createObjectURL(blob);
@@ -27,7 +30,6 @@ type LineItem = {
 };
 
 export default function Home() {
-
   const [formData, setFormData] = useState({
     masterPO: false,
     PO: "",
@@ -134,7 +136,14 @@ export default function Home() {
     rightBottomNotes: 40,
   };
 
-  const vendorDetails: { vendor: string; address1: string }[] = [
+  const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
+  
+  const [vendorDetails, setVendorDetails] = useState<
+    {
+      vendor: string;
+      address1: string;
+    }[]
+  >([
     {
       vendor: "Vendor 1",
       address1:
@@ -155,42 +164,29 @@ export default function Home() {
       address1:
         "1213 Oak Lane, Apt 303, Sunset Park Brooklyn, New York 11220, USA",
     },
-  ];
+  ]);
+  console.log(vendorDetails);
+  
 
   const jobDetails: {
     jobOrEquip: string;
     jobName: string;
-    jobTask: string;
-    officeContact: string;
-    tel: string;
   }[] = [
     {
       jobOrEquip: "Job 1",
       jobName: "Job Name 1 sds dsdf dsfsddfssds",
-      jobTask: "Job Task 1",
-      officeContact: "123-456-7890",
-      tel: "123-456-7890",
     },
     {
       jobOrEquip: "Job 2",
       jobName: "Job Name 2asdaf fdfsd fdsfsd fdsfsdfsd",
-      jobTask: "Job Task 2 fsdfsdfsd",
-      officeContact: "123-456-7890",
-      tel: "987-654-3210",
     },
     {
       jobOrEquip: "Job 3",
       jobName: "Job Name 3",
-      jobTask: "Job Task 3",
-      officeContact: "123-456-7890",
-      tel: "555-555-5555",
     },
     {
       jobOrEquip: "Job 4",
       jobName: "Job Name 4",
-      jobTask: "Job Task 4",
-      officeContact: "123-456-7890",
-      tel: "444-444-4444",
     },
   ];
 
@@ -397,20 +393,6 @@ export default function Home() {
       if (checked) checkbox.check();
     };
 
-    // const getTextWidth = (text: string, font: PDFFont, fontSize: number) => {
-    //   return font.widthOfTextAtSize(text, fontSize);
-    // };
-
-    // console.log({
-    //   A: getTextWidth("A", font, 8),
-    //   Z: getTextWidth("Z", font, 8),
-    //   a: getTextWidth("a", font, 8),
-    //   b: getTextWidth("b", font, 8),
-    //   "2": getTextWidth("2", font, 8),
-    //   "7": getTextWidth("7", font, 8),
-    //   ",": getTextWidth(",", font, 8),
-    // });
-
     // 🔧 Estimated coordinates – adjust as needed
     const rowHeight = 14.5;
 
@@ -429,8 +411,25 @@ export default function Home() {
 
     const formatDateToDMY = (dateStr: string) => {
       const [year, month, day] = dateStr.split("-");
-      return `${day}-${month}-${year}`;
+      return `${month}/${day}/${year}`;
     };
+
+    const convertToAmPm = (time: string): string => {
+      if (!time) return "";
+
+      const [hours, minutes] = time.split(":").map(Number);
+      const amPm = hours >= 12 ? "PM" : "AM";
+      const adjustedHours = hours % 12 || 12;
+
+      return `${adjustedHours}:${minutes.toString().padStart(2, "0")} ${amPm}`;
+    };
+
+    formData.time1 = convertToAmPm(formData.time1);
+    formData.time2 = convertToAmPm(formData.time2);
+    formData.time3 = convertToAmPm(formData.time3);
+    formData.time4 = convertToAmPm(formData.time4);
+    formData.rightTime = convertToAmPm(formData.rightTime);
+
     
     formData.date = formatDateToDMY(formData.date);
     formData.date1 = formatDateToDMY(formData.date1);
@@ -693,28 +692,77 @@ export default function Home() {
               Vendor
             </label>
             <Select
-              placeholder="Select a vendor"
-              options={vendorDetails.map((vendor) => {
-                return {
-                  label: vendor.vendor,
-                  value: vendor.vendor,
-                };
-              })}
-              onChange={(value) => {
-                const selectedVendor = vendorDetails.find(
-                  (vendor) => vendor.vendor === value
-                );
-                if (selectedVendor) {
-                  console.log(selectedVendor);
+        placeholder="Select a vendor"
+        value={formData.vendor} // Control the Select with formData.vendor
+        options={[
+          ...vendorDetails.map((vendor) => ({
+            label: vendor.vendor,
+            value: vendor.vendor,
+          })),
+          { label: "+ Add Vendor", value: "__add_vendor__" },
+        ]}
+        onChange={(value) => {
+          if (value === "__add_vendor__") {
+            if (!isAddVendorModalOpen) {
+              setIsAddVendorModalOpen(true);
+            }
+            return;
+          }
 
-                  setFormData((prev) => ({
-                    ...prev,
-                    vendor: selectedVendor.vendor,
-                    address1: selectedVendor.address1,
-                  }));
-                }
-              }}
-            ></Select>
+          const selectedVendor = vendorDetails.find(
+            (vendor) => vendor.vendor === value
+          );
+          if (selectedVendor) {
+            setFormData({
+              ...formData,
+              vendor: selectedVendor.vendor,
+              address1: selectedVendor.address1,
+            });
+          } else {
+            // Reset formData if an invalid value is selected
+            setFormData((prev) => ({
+              ...prev,
+              vendor: "",
+              address1: "",
+            }));
+          }
+        }}
+      />
+
+      <Modal
+        isOpen={isAddVendorModalOpen}
+        onClose={() => {
+          setIsAddVendorModalOpen(false);
+          setFormData((prev) => ({
+            ...prev,
+            vendor: vendorDetails.some((v) => v.vendor === prev.vendor)
+              ? prev.vendor
+              : "", // Reset vendor if it was "__add_vendor__" or invalid
+            address1: vendorDetails.some((v) => v.vendor === prev.vendor)
+              ? prev.address1
+              : "",
+          }));
+        }}
+      >
+        <AddVendorModalContent
+          onClose={() => {
+            setIsAddVendorModalOpen(false);
+            setFormData((prev) => ({
+              ...prev,
+              vendor: vendorDetails.some((v) => v.vendor === prev.vendor)
+                ? prev.vendor
+                : "",
+              address1: vendorDetails.some((v) => v.vendor === prev.vendor)
+                ? prev.address1
+                : "",
+            }));
+          }}
+          onVendorAdded={(newVendor) => {
+            setVendorDetails((prev) => [...prev, newVendor]);
+            setIsAddVendorModalOpen(false);
+          }}
+        />
+      </Modal>
           </div>
 
           <div className="flex flex-col space-y-1.5">
@@ -1119,9 +1167,9 @@ export default function Home() {
                     ...prev,
                     jobNumber: selectedJob.jobOrEquip,
                     jobName: selectedJob.jobName,
-                    jobTask: selectedJob.jobTask,
-                    officeContact: selectedJob.officeContact,
-                    officeTel: selectedJob.tel,
+                    // jobTask: selectedJob.jobTask,
+                    // officeContact: selectedJob.officeContact,
+                    // officeTel: selectedJob.tel,
                   }));
                 }
               }}
@@ -1144,7 +1192,7 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
+            {/* <label
               htmlFor="jobTask"
               className="text-sm font-medium text-gray-700 dark:text-gray-300"
             >
@@ -1157,6 +1205,14 @@ export default function Home() {
               placeholder="Job Task / Use"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            /> */}
+            <LimitedInput
+              name="jobTask"
+              label="Job Task / Use"
+              placeholder="Job Task / Use"
+              value={formData.jobTask}
+              max={fieldConfigs.jobTask}
+              onChange={handleChange}
             />
           </div>
 
@@ -1172,7 +1228,14 @@ export default function Home() {
               name="officeContact"
               placeholder="Office Contact"
               value={formData.officeContact}
-              onChange={handleChange}
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
@@ -1189,7 +1252,14 @@ export default function Home() {
               name="officeTel"
               placeholder="Tel"
               value={formData.officeTel}
-              onChange={handleChange}
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
@@ -1927,24 +1997,27 @@ const LimitedInput = ({
 
   return (
     <div className="flex flex-col space-y-1.5 relative">
-      {label && (
-        label !== "AMEX Details" && label !== "Other Details" ? (
-        <label htmlFor={name} className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {label}
-        </label>
-      ) : null)}
+      {label &&
+        (label !== "AMEX Details" && label !== "Other Details" ? (
+          <label
+            htmlFor={name}
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            {label}
+          </label>
+        ) : null)}
       <input
         id={name}
         name={name}
         value={value}
         onChange={handleChange}
         placeholder={placeholder}
-        className="w-full px-3 py-2 pr-16 border border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-900 text-gray-100 " 
-
+        className="w-full px-3 py-2 pr-16 border border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-900 text-gray-100 "
       />
       <span className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-500">
-  {value.length} / {max}
-</span>
+        {value.length} / {max}
+      </span>
     </div>
   );
 };
+
