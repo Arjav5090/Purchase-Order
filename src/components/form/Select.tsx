@@ -46,7 +46,7 @@ const Select: React.FC<SelectProps> = ({
           value={option.value}
           className={`text-gray-700 dark:bg-gray-900 dark:text-gray-400 ${
             option.value === "__add_vendor__"
-              ? "text-green-500 font-semibold"
+              ? " font-semibold"
               : ""
           }`}
         >
