@@ -538,8 +538,8 @@ export default function Home() {
       );
       draw(item.quantity, 245, currentY);
       draw(item.um, 275, currentY);
-      draw(`$${item.unitCost}`, 300, currentY);
-      draw(`$${item.total}`, 340, currentY);
+      draw(`${item.unitCost}`, 300, currentY); //dollar in string
+      draw(`${item.total}`, 340, currentY); //dollar in string
       draw(item.jobEquipNotes, 390, currentY);
       draw(item.costCode, 510, currentY);
       draw(item.payItem, 560, currentY);
@@ -560,11 +560,11 @@ export default function Home() {
     //   draw(item.payItem, 560, y);
     // });
 
-    draw(`$${formData.subtotal}`, 335, 123);
-    draw(`$${formData.delivery}`, 335, 108);
-    draw(`$${formData.salesTax}`, 335, 93);
-    draw(`$${formData.bottomOther}`, 335, 78);
-    draw(`$${formData.grandTotal}`, 335, 63);
+    draw(`${formData.subtotal}`, 335, 123);//dollar in string
+    draw(`${formData.delivery}`, 335, 108);//dollar in string
+    draw(`${formData.salesTax}`, 335, 93);//dollar in string
+    draw(`${formData.bottomOther}`, 335, 78);//dollar in string
+    draw(`${formData.grandTotal}`, 335, 63);//dollar in string
 
     draw(formData.sign, 33, 28);
     draw(formData.signDate, 270, 28);
