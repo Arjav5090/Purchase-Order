@@ -5,7 +5,8 @@ import Input from "../../components/form/input/InputField";
 import Select from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
 import AddVendorModalContent from "./Modal";
-import { format, parse } from 'date-fns';
+// import { format, parse } from 'date-fns';
+// import { DatePickerDemo } from "./DatePicker";
 
 const downloadBlob = (blob: Blob, fileName: string) => {
   const url = URL.createObjectURL(blob);
@@ -431,14 +432,13 @@ export default function Home() {
     formData.rightTime = convertToAmPm(formData.rightTime);
 
     
-    formData.date = formatDateToDMY(formData.date);
-    formData.date1 = formatDateToDMY(formData.date1);
-    formData.date2 = formatDateToDMY(formData.date2);
-    formData.date3 = formatDateToDMY(formData.date3);
-    formData.date4 = formatDateToDMY(formData.date4);
-    formData.rightDate = formatDateToDMY(formData.rightDate);
-    formData.approvedDate = formatDateToDMY(formData.approvedDate);
-    formData.signDate = formatDateToDMY(formData.signDate);
+    formData.date = formData.date ? formatDateToDMY(formData.date) : "";
+    formData.date1 = formData.date1 ? formatDateToDMY(formData.date1) : "";
+    formData.date2 = formData.date2 ? formatDateToDMY(formData.date2) : "";
+    formData.date3 = formData.date3 ? formatDateToDMY(formData.date3) : "";
+    formData.date4 = formData.date4 ? formatDateToDMY(formData.date4) : "";
+    formData.approvedDate = formData.approvedDate ? formatDateToDMY(formData.approvedDate) : "";
+    formData.signDate = formData.signDate ? formatDateToDMY(formData.signDate) : "";
 
     draw(formData.date, 78, 703);
     draw(formData.vendor, 78, 688);
@@ -629,6 +629,7 @@ export default function Home() {
 
   return (
     <>
+
       <PageMeta
         title="Purhcase Order  | Create PDF of the Purchase Order"
         description="Create PDF of the Purchase Order."
@@ -1024,6 +1025,7 @@ export default function Home() {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
+                {/* <DatePickerDemo /> */}
               </div>
               <div className="flex flex-col space-y-1.5">
                 <label
@@ -1997,27 +1999,29 @@ const LimitedInput = ({
 
   return (
     <div className="flex flex-col space-y-1.5 relative">
-      {label &&
-        (label !== "AMEX Details" && label !== "Other Details" ? (
-          <label
-            htmlFor={name}
-            className="text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            {label}
-          </label>
-        ) : null)}
-      <input
-        id={name}
-        name={name}
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 pr-16 border border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-900 text-gray-100 "
-      />
-      <span className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-500">
-        {value.length} / {max}
-      </span>
-    </div>
+  {label &&
+    (label !== "AMEX Details" && label !== "Other Details" ? (
+      <label
+        htmlFor={name}
+        className="text-sm font-medium text-gray-700 dark:text-gray-300"
+      >
+        {label}
+      </label>
+    ) : null)}
+  <input
+  id={name}
+  name={name}
+  value={value}
+  onChange={handleChange}
+  placeholder={placeholder}
+  className="w-full px-3 py-2 pr-16 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100"
+/>
+
+  <span className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400">
+    {value.length} / {max}
+  </span>
+</div>
+
   );
 };
 
