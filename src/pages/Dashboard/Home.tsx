@@ -135,10 +135,11 @@ export default function Home() {
     pmSignature: 22,
     approvedBy: 20,
     rightBottomNotes: 40,
+    jobTask: 45,
   };
 
   const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
-  
+
   const [vendorDetails, setVendorDetails] = useState<
     {
       vendor: string;
@@ -166,8 +167,7 @@ export default function Home() {
         "1213 Oak Lane, Apt 303, Sunset Park Brooklyn, New York 11220, USA",
     },
   ]);
-  console.log(vendorDetails);
-  
+  // console.log(vendorDetails);
 
   const jobDetails: {
     jobOrEquip: string;
@@ -431,14 +431,17 @@ export default function Home() {
     formData.time4 = convertToAmPm(formData.time4);
     formData.rightTime = convertToAmPm(formData.rightTime);
 
-    
     formData.date = formData.date ? formatDateToDMY(formData.date) : "";
     formData.date1 = formData.date1 ? formatDateToDMY(formData.date1) : "";
     formData.date2 = formData.date2 ? formatDateToDMY(formData.date2) : "";
     formData.date3 = formData.date3 ? formatDateToDMY(formData.date3) : "";
     formData.date4 = formData.date4 ? formatDateToDMY(formData.date4) : "";
-    formData.approvedDate = formData.approvedDate ? formatDateToDMY(formData.approvedDate) : "";
-    formData.signDate = formData.signDate ? formatDateToDMY(formData.signDate) : "";
+    formData.approvedDate = formData.approvedDate
+      ? formatDateToDMY(formData.approvedDate)
+      : "";
+    formData.signDate = formData.signDate
+      ? formatDateToDMY(formData.signDate)
+      : "";
 
     draw(formData.date, 78, 703);
     draw(formData.vendor, 78, 688);
@@ -629,7 +632,6 @@ export default function Home() {
 
   return (
     <>
-
       <PageMeta
         title="Purhcase Order  | Create PDF of the Purchase Order"
         description="Create PDF of the Purchase Order."
@@ -693,77 +695,79 @@ export default function Home() {
               Vendor
             </label>
             <Select
-        placeholder="Select a vendor"
-        value={formData.vendor} // Control the Select with formData.vendor
-        options={[
-          ...vendorDetails.map((vendor) => ({
-            label: vendor.vendor,
-            value: vendor.vendor,
-          })),
-          { label: "+ Add Vendor", value: "__add_vendor__" },
-        ]}
-        onChange={(value) => {
-          if (value === "__add_vendor__") {
-            if (!isAddVendorModalOpen) {
-              setIsAddVendorModalOpen(true);
-            }
-            return;
-          }
+              placeholder="Select a vendor"
+              value={formData.vendor} // Control the Select with formData.vendor
+              options={[
+                ...vendorDetails.map((vendor) => ({
+                  label: vendor.vendor,
+                  value: vendor.vendor,
+                })),
+                { label: "+ Add Vendor", value: "__add_vendor__" },
+              ]}
+              onChange={(value) => {
+                if (value === "__add_vendor__") {
+                  if (!isAddVendorModalOpen) {
+                    setIsAddVendorModalOpen(true);
+                  }
+                  return;
+                }
 
-          const selectedVendor = vendorDetails.find(
-            (vendor) => vendor.vendor === value
-          );
-          if (selectedVendor) {
-            setFormData({
-              ...formData,
-              vendor: selectedVendor.vendor,
-              address1: selectedVendor.address1,
-            });
-          } else {
-            // Reset formData if an invalid value is selected
-            setFormData((prev) => ({
-              ...prev,
-              vendor: "",
-              address1: "",
-            }));
-          }
-        }}
-      />
+                const selectedVendor = vendorDetails.find(
+                  (vendor) => vendor.vendor === value
+                );
+                if (selectedVendor) {
+                  setFormData({
+                    ...formData,
+                    vendor: selectedVendor.vendor,
+                    address1: selectedVendor.address1,
+                  });
+                } else {
+                  // Reset formData if an invalid value is selected
+                  setFormData((prev) => ({
+                    ...prev,
+                    vendor: "",
+                    address1: "",
+                  }));
+                }
+              }}
+            />
 
-      <Modal
-        isOpen={isAddVendorModalOpen}
-        onClose={() => {
-          setIsAddVendorModalOpen(false);
-          setFormData((prev) => ({
-            ...prev,
-            vendor: vendorDetails.some((v) => v.vendor === prev.vendor)
-              ? prev.vendor
-              : "", // Reset vendor if it was "__add_vendor__" or invalid
-            address1: vendorDetails.some((v) => v.vendor === prev.vendor)
-              ? prev.address1
-              : "",
-          }));
-        }}
-      >
-        <AddVendorModalContent
-          onClose={() => {
-            setIsAddVendorModalOpen(false);
-            setFormData((prev) => ({
-              ...prev,
-              vendor: vendorDetails.some((v) => v.vendor === prev.vendor)
-                ? prev.vendor
-                : "",
-              address1: vendorDetails.some((v) => v.vendor === prev.vendor)
-                ? prev.address1
-                : "",
-            }));
-          }}
-          onVendorAdded={(newVendor) => {
-            setVendorDetails((prev) => [...prev, newVendor]);
-            setIsAddVendorModalOpen(false);
-          }}
-        />
-      </Modal>
+            <Modal
+              isOpen={isAddVendorModalOpen}
+              onClose={() => {
+                setIsAddVendorModalOpen(false);
+                setFormData((prev) => ({
+                  ...prev,
+                  vendor: vendorDetails.some((v) => v.vendor === prev.vendor)
+                    ? prev.vendor
+                    : "", // Reset vendor if it was "__add_vendor__" or invalid
+                  address1: vendorDetails.some((v) => v.vendor === prev.vendor)
+                    ? prev.address1
+                    : "",
+                }));
+              }}
+            >
+              <AddVendorModalContent
+                onClose={() => {
+                  setIsAddVendorModalOpen(false);
+                  setFormData((prev) => ({
+                    ...prev,
+                    vendor: vendorDetails.some((v) => v.vendor === prev.vendor)
+                      ? prev.vendor
+                      : "",
+                    address1: vendorDetails.some(
+                      (v) => v.vendor === prev.vendor
+                    )
+                      ? prev.address1
+                      : "",
+                  }));
+                }}
+                onVendorAdded={(newVendor) => {
+                  setVendorDetails((prev) => [...prev, newVendor]);
+                  setIsAddVendorModalOpen(false);
+                }}
+              />
+            </Modal>
           </div>
 
           <div className="flex flex-col space-y-1.5">
@@ -1999,29 +2003,27 @@ const LimitedInput = ({
 
   return (
     <div className="flex flex-col space-y-1.5 relative">
-  {label &&
-    (label !== "AMEX Details" && label !== "Other Details" ? (
-      <label
-        htmlFor={name}
-        className="text-sm font-medium text-gray-700 dark:text-gray-300"
-      >
-        {label}
-      </label>
-    ) : null)}
-  <input
-  id={name}
-  name={name}
-  value={value}
-  onChange={handleChange}
-  placeholder={placeholder}
-  className="w-full px-3 py-2 pr-16 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100"
-/>
+      {label &&
+        (label !== "AMEX Details" && label !== "Other Details" ? (
+          <label
+            htmlFor={name}
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            {label}
+          </label>
+        ) : null)}
+      <input
+        id={name}
+        name={name}
+        value={value}
+        onChange={handleChange}
+        placeholder={placeholder}
+        className="w-full px-3 py-2 pr-16 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100"
+      />
 
-  <span className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400">
-    {value.length} / {max}
-  </span>
-</div>
-
+      <span className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400">
+        {value.length} / {max}
+      </span>
+    </div>
   );
 };
-
