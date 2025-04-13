@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import Input from "../../components/form/input/InputField";
+import Select from "../../components/form/Select";
+import { Modal } from "../../components/ui/modal";
+import AddVendorModalContent from "./Modal";
+// import { format, parse } from 'date-fns';
+// import { DatePickerDemo } from "./DatePicker";
 
 const downloadBlob = (blob: Blob, fileName: string) => {
   const url = URL.createObjectURL(blob);
@@ -26,8 +31,6 @@ type LineItem = {
 };
 
 export default function Home() {
-
-
   const [formData, setFormData] = useState({
     masterPO: false,
     PO: "",
@@ -112,6 +115,82 @@ export default function Home() {
     signDate: "",
   });
 
+  const fieldConfigs: { [key: string]: number } = {
+    attention: 45,
+    ext: 6,
+    email: 50,
+    deliveryNotes: 40,
+    requestedBy: 15,
+    orderedBy: 15,
+    coCe: 15,
+    rightNotes: 20,
+    approxCost: 15,
+    amexText: 20,
+    otherText: 20,
+    ccPo: 35,
+    author: 18,
+    authorSignature: 20,
+    address2: 85,
+    pmName: 18,
+    pmSignature: 22,
+    approvedBy: 20,
+    rightBottomNotes: 40,
+  };
+
+  const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
+  
+  const [vendorDetails, setVendorDetails] = useState<
+    {
+      vendor: string;
+      address1: string;
+    }[]
+  >([
+    {
+      vendor: "Vendor 1",
+      address1:
+        "1234 Westwood Drive, Apt 502, Sunset Park Brooklyn, New York 11220, USA",
+    },
+    {
+      vendor: "Vendor 2",
+      address1:
+        "5678 Elm Street, Apt 101, Sunset Park Brooklyn, New York 11220, USA",
+    },
+    {
+      vendor: "Vendor 3",
+      address1:
+        "91011 Maple Avenue, Apt 202, Sunset Park Brooklyn, New York 11220, USA",
+    },
+    {
+      vendor: "Vendor 4",
+      address1:
+        "1213 Oak Lane, Apt 303, Sunset Park Brooklyn, New York 11220, USA",
+    },
+  ]);
+  console.log(vendorDetails);
+  
+
+  const jobDetails: {
+    jobOrEquip: string;
+    jobName: string;
+  }[] = [
+    {
+      jobOrEquip: "Job 1",
+      jobName: "Job Name 1 sds dsdf dsfsddfssds",
+    },
+    {
+      jobOrEquip: "Job 2",
+      jobName: "Job Name 2asdaf fdfsd fdsfsd fdsfsdfsd",
+    },
+    {
+      jobOrEquip: "Job 3",
+      jobName: "Job Name 3",
+    },
+    {
+      jobOrEquip: "Job 4",
+      jobName: "Job Name 4",
+    },
+  ];
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -151,36 +230,134 @@ export default function Home() {
     }
     setFormData({ ...formData, lineItems: updatedItems });
   };
-  
+
   useEffect(() => {
     // Calculate Subtotal (sum of all line item totals)
     const subtotal = formData.lineItems.reduce((acc, item) => {
       return acc + (parseFloat(item.total) || 0);
     }, 0);
-  
+
     // Ensure delivery, salesTax, and other default to 0 unless user changes them
     const delivery = parseFloat(formData.delivery) || 0;
     const salesTax = parseFloat(formData.salesTax) || 0;
     const other = parseFloat(formData.bottomOther) || 0;
-  
+
     // Calculate Grand Total
     const grandTotal = subtotal + delivery + salesTax + other;
-  
+
     // Update formData with new calculated values
     setFormData((prevState) => ({
       ...prevState,
       subtotal: subtotal.toFixed(2),
       grandTotal: grandTotal.toFixed(2),
     }));
-  }, [formData.lineItems, formData.delivery, formData.salesTax, formData.bottomOther]);
-  
+  }, [
+    formData.lineItems,
+    formData.delivery,
+    formData.salesTax,
+    formData.bottomOther,
+  ]);
+
   const generatePdf = async () => {
-    const existingPdfBytes = await fetch(`${import.meta.env.BASE_URL}/company-template.pdf`).then((res) =>
-      res.arrayBuffer()
-    );
+    const existingPdfBytes = await fetch(
+      `${import.meta.env.BASE_URL}/company-template.pdf`
+    ).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const page = pdfDoc.getPages()[0];
+
+    console.log(formData.attention);
+
+    const drawWrappedText = (
+      text: string,
+      x: number,
+      y: number,
+      maxWidth: number,
+      lineHeight = 15
+    ): number => {
+      if (!text || typeof text !== "string") return 0;
+
+      let line = "";
+      let offsetY = 0;
+      let linesUsed = 0;
+
+      const splitLongWord = (word: string): string[] => {
+        const chars = word.split("");
+        let part = "";
+        const parts = [];
+
+        for (let char of chars) {
+          const testPart = part + char;
+          const width = font.widthOfTextAtSize(testPart, 8);
+          if (width > maxWidth && part !== "") {
+            parts.push(part);
+            part = char;
+          } else {
+            part = testPart;
+          }
+        }
+        if (part) parts.push(part);
+        return parts;
+      };
+
+      const words = text.split(" ");
+
+      for (let word of words) {
+        const testLine = line + word + " ";
+        const testWidth = font.widthOfTextAtSize(testLine, 8);
+
+        if (testWidth > maxWidth && line !== "") {
+          page.drawText(line.trim(), {
+            x,
+            y: y - offsetY,
+            size: 8,
+            font,
+            color: rgb(0, 0, 0),
+          });
+          line = "";
+          offsetY += lineHeight;
+          linesUsed++;
+        }
+
+        if (font.widthOfTextAtSize(word, 8) > maxWidth) {
+          const parts = splitLongWord(word);
+          for (let part of parts) {
+            if (
+              font.widthOfTextAtSize(line + part, 8) > maxWidth &&
+              line !== ""
+            ) {
+              page.drawText(line.trim(), {
+                x,
+                y: y - offsetY,
+                size: 8,
+                font,
+                color: rgb(0, 0, 0),
+              });
+              line = "";
+              offsetY += lineHeight;
+              linesUsed++;
+            }
+            line += part;
+          }
+          line += " ";
+        } else {
+          line += word + " ";
+        }
+      }
+
+      if (line.trim()) {
+        page.drawText(line.trim(), {
+          x,
+          y: y - offsetY,
+          size: 8,
+          font,
+          color: rgb(0, 0, 0),
+        });
+        linesUsed++;
+      }
+
+      return linesUsed;
+    };
 
     const draw = (text: string, x: number, y: number) => {
       if (!text || typeof text !== "string") return;
@@ -218,6 +395,7 @@ export default function Home() {
     };
 
     // 🔧 Estimated coordinates – adjust as needed
+    const rowHeight = 14.5;
 
     drawCheckbox("checkbox.masterPO", formData.masterPO, 395, 715);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -232,9 +410,40 @@ export default function Home() {
       color: formData.masterPO ? rgb(1, 0, 0) : rgb(1, 0, 0), // red if masterPO
     });
 
+    const formatDateToDMY = (dateStr: string) => {
+      const [year, month, day] = dateStr.split("-");
+      return `${month}/${day}/${year}`;
+    };
+
+    const convertToAmPm = (time: string): string => {
+      if (!time) return "";
+
+      const [hours, minutes] = time.split(":").map(Number);
+      const amPm = hours >= 12 ? "PM" : "AM";
+      const adjustedHours = hours % 12 || 12;
+
+      return `${adjustedHours}:${minutes.toString().padStart(2, "0")} ${amPm}`;
+    };
+
+    formData.time1 = convertToAmPm(formData.time1);
+    formData.time2 = convertToAmPm(formData.time2);
+    formData.time3 = convertToAmPm(formData.time3);
+    formData.time4 = convertToAmPm(formData.time4);
+    formData.rightTime = convertToAmPm(formData.rightTime);
+
+    
+    formData.date = formData.date ? formatDateToDMY(formData.date) : "";
+    formData.date1 = formData.date1 ? formatDateToDMY(formData.date1) : "";
+    formData.date2 = formData.date2 ? formatDateToDMY(formData.date2) : "";
+    formData.date3 = formData.date3 ? formatDateToDMY(formData.date3) : "";
+    formData.date4 = formData.date4 ? formatDateToDMY(formData.date4) : "";
+    formData.approvedDate = formData.approvedDate ? formatDateToDMY(formData.approvedDate) : "";
+    formData.signDate = formData.signDate ? formatDateToDMY(formData.signDate) : "";
+
     draw(formData.date, 78, 703);
     draw(formData.vendor, 78, 688);
-    draw(formData.address1, 78, 673);
+    // draw(formData.address1, 78, 673);
+    drawWrappedText(formData.address1, 78, 673, 180);
     draw(formData.attention, 78, 643);
     draw(formData.tel, 78, 628);
     draw(formData.ext, 244, 628);
@@ -249,8 +458,8 @@ export default function Home() {
     draw(formData.driverTel, 215, 565);
     draw(formData.siteContact, 115, 550);
     draw(formData.siteTel, 215, 550);
-    draw(formData.address2, 88, 538);
-    draw(formData.deliveryNotes, 97, 505);
+    drawWrappedText(formData.address2, 88, 538, 180);
+    draw(formData.deliveryNotes, 97, 507);
 
     const drawHighlightedText = (
       text: string,
@@ -271,14 +480,14 @@ export default function Home() {
       draw(text, x, y);
     };
 
-    drawHighlightedText(formData.date1, 65, 476);
-    drawHighlightedText(formData.time1, 122, 476);
-    drawHighlightedText(formData.date2, 65, 462);
-    drawHighlightedText(formData.time2, 122, 462);
-    drawHighlightedText(formData.date3, 190, 476);
+    drawHighlightedText(formData.date1, 60, 476);
+    drawHighlightedText(formData.time1, 119, 476);
+    drawHighlightedText(formData.date2, 60, 462);
+    drawHighlightedText(formData.time2, 119, 462);
+    drawHighlightedText(formData.date3, 187, 476);
     drawHighlightedText(formData.time3, 250, 476);
-    
-    drawHighlightedText(formData.date4, 190, 462);
+
+    drawHighlightedText(formData.date4, 187, 462);
     drawHighlightedText(formData.time4, 250, 462);
 
     draw(formData.jobNumber, 400, 703);
@@ -295,7 +504,7 @@ export default function Home() {
     draw(formData.approxCost, 360, 596);
 
     drawCheckbox("checkbox.amex", formData.amex, 462, 595);
-    draw(formData.amexText, 508, 596);
+    draw(formData.amexText, 505, 596);
     drawCheckbox("checkbox.cod", formData.cod, 318, 579);
     drawCheckbox("checkbox.onAccount", formData.onAccount, 375, 579);
     drawCheckbox("checkbox.other", formData.other, 462, 579);
@@ -317,33 +526,53 @@ export default function Home() {
     draw(formData.rightBottomNotes, 335, 476);
 
     const startY = 430;
-    const rowHeight = 15;
+    let currentY = startY;
 
-    formData.lineItems.forEach((item, idx) => {
-      const y = startY - idx * rowHeight;
-      draw(item.description, 35, y);
-      draw(item.quantity, 245, y);
-      draw(item.um, 275, y);
-      draw(`$${item.unitCost}`, 300, y);
-      draw(`$${item.total}`, 340, y);
-      draw(item.jobEquipNotes, 390, y);
-      draw(item.costCode, 510, y);
-      draw(item.payItem, 560, y);
+    formData.lineItems.forEach((item) => {
+      const linesUsed = drawWrappedText(
+        item.description,
+        35,
+        currentY,
+        180,
+        rowHeight
+      );
+      draw(item.quantity, 245, currentY);
+      draw(item.um, 275, currentY);
+      draw(`${item.unitCost}`, 300, currentY); //dollar in string
+      draw(`${item.total}`, 340, currentY); //dollar in string
+      draw(item.jobEquipNotes, 390, currentY);
+      draw(item.costCode, 510, currentY);
+      draw(item.payItem, 560, currentY);
+
+      // Move Y down for the next item based on wrapped height
+      currentY -= (linesUsed + 1) * rowHeight;
     });
 
-    draw(`$${formData.subtotal}`, 335, 123);
-    draw(`$${formData.delivery}`, 335, 108);
-    draw(`$${formData.salesTax}`, 335, 93);
-    draw(`$${formData.bottomOther}`, 335, 78);
-    draw(`$${formData.grandTotal}`, 335, 63);
+    // formData.lineItems.forEach((item, idx) => {
+    //   const y = startY - idx * rowHeight;
+    //   draw(item.description, 35, y);
+    //   draw(item.quantity, 245, y);
+    //   draw(item.um, 275, y);
+    //   draw(`$${item.unitCost}`, 300, y);
+    //   draw(`$${item.total}`, 340, y);
+    //   draw(item.jobEquipNotes, 390, y);
+    //   draw(item.costCode, 510, y);
+    //   draw(item.payItem, 560, y);
+    // });
+
+    draw(`${formData.subtotal}`, 335, 123);//dollar in string
+    draw(`${formData.delivery}`, 335, 108);//dollar in string
+    draw(`${formData.salesTax}`, 335, 93);//dollar in string
+    draw(`${formData.bottomOther}`, 335, 78);//dollar in string
+    draw(`${formData.grandTotal}`, 335, 63);//dollar in string
 
     draw(formData.sign, 33, 28);
     draw(formData.signDate, 270, 28);
 
     if (formData.taxExemptYes) {
-      const extraPdfBytes = await fetch(`${import.meta.env.BASE_URL}/tax-exempt.pdf`).then((res) =>
-        res.arrayBuffer()
-      );
+      const extraPdfBytes = await fetch(
+        `${import.meta.env.BASE_URL}/tax-exempt.pdf`
+      ).then((res) => res.arrayBuffer());
       const extraPdf = await PDFDocument.load(extraPdfBytes);
       const copiedPages = await pdfDoc.copyPages(
         extraPdf,
@@ -380,26 +609,27 @@ export default function Home() {
     if (formData.vendorQuoteYes && uploadedQuotePdf) {
       const quoteBytes = await uploadedQuotePdf.arrayBuffer();
       const quotePdf = await PDFDocument.load(quoteBytes);
-      const quotePages = await pdfDoc.copyPages(quotePdf, quotePdf.getPageIndices());
-    
+      const quotePages = await pdfDoc.copyPages(
+        quotePdf,
+        quotePdf.getPageIndices()
+      );
+
       quotePages.forEach((page) => {
         pdfDoc.addPage(page);
       });
     }
-    
 
     form.flatten();
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
     downloadBlob(blob, "PurchaseOrder.pdf");
-   
-    
   };
 
   const [uploadedQuotePdf, setUploadedQuotePdf] = useState<File | null>(null);
 
   return (
     <>
+
       <PageMeta
         title="Purhcase Order  | Create PDF of the Purchase Order"
         description="Create PDF of the Purchase Order."
@@ -432,6 +662,7 @@ export default function Home() {
               id="PO"
               name="PO"
               placeholder="PO"
+              type="number"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -447,6 +678,7 @@ export default function Home() {
             <Input
               id="date"
               name="date"
+              type="date"
               placeholder="Date"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -460,13 +692,78 @@ export default function Home() {
             >
               Vendor
             </label>
-            <Input
-              id="vendor"
-              name="vendor"
-              placeholder="Vendor"
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            />
+            <Select
+        placeholder="Select a vendor"
+        value={formData.vendor} // Control the Select with formData.vendor
+        options={[
+          ...vendorDetails.map((vendor) => ({
+            label: vendor.vendor,
+            value: vendor.vendor,
+          })),
+          { label: "+ Add Vendor", value: "__add_vendor__" },
+        ]}
+        onChange={(value) => {
+          if (value === "__add_vendor__") {
+            if (!isAddVendorModalOpen) {
+              setIsAddVendorModalOpen(true);
+            }
+            return;
+          }
+
+          const selectedVendor = vendorDetails.find(
+            (vendor) => vendor.vendor === value
+          );
+          if (selectedVendor) {
+            setFormData({
+              ...formData,
+              vendor: selectedVendor.vendor,
+              address1: selectedVendor.address1,
+            });
+          } else {
+            // Reset formData if an invalid value is selected
+            setFormData((prev) => ({
+              ...prev,
+              vendor: "",
+              address1: "",
+            }));
+          }
+        }}
+      />
+
+      <Modal
+        isOpen={isAddVendorModalOpen}
+        onClose={() => {
+          setIsAddVendorModalOpen(false);
+          setFormData((prev) => ({
+            ...prev,
+            vendor: vendorDetails.some((v) => v.vendor === prev.vendor)
+              ? prev.vendor
+              : "", // Reset vendor if it was "__add_vendor__" or invalid
+            address1: vendorDetails.some((v) => v.vendor === prev.vendor)
+              ? prev.address1
+              : "",
+          }));
+        }}
+      >
+        <AddVendorModalContent
+          onClose={() => {
+            setIsAddVendorModalOpen(false);
+            setFormData((prev) => ({
+              ...prev,
+              vendor: vendorDetails.some((v) => v.vendor === prev.vendor)
+                ? prev.vendor
+                : "",
+              address1: vendorDetails.some((v) => v.vendor === prev.vendor)
+                ? prev.address1
+                : "",
+            }));
+          }}
+          onVendorAdded={(newVendor) => {
+            setVendorDetails((prev) => [...prev, newVendor]);
+            setIsAddVendorModalOpen(false);
+          }}
+        />
+      </Modal>
           </div>
 
           <div className="flex flex-col space-y-1.5">
@@ -480,26 +777,20 @@ export default function Home() {
               id="address1"
               name="address1"
               placeholder="Address"
+              value={formData.address1}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
-          <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="attention"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Attention
-            </label>
-            <Input
-              id="attention"
-              name="attention"
-              placeholder="Attention"
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            />
-          </div>
+          <LimitedInput
+            name="attention"
+            label="Attention"
+            placeholder="Attention"
+            value={formData.attention}
+            max={fieldConfigs.attention}
+            onChange={handleChange}
+          />
 
           <div className="flex flex-col space-y-1.5">
             <label
@@ -512,40 +803,37 @@ export default function Home() {
               id="tel"
               name="tel"
               placeholder="Tel"
-              onChange={handleChange}
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="ext"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Extension
-            </label>
-            <Input
-              id="ext"
+            <LimitedInput
               name="ext"
-              placeholder="Ext"
+              label="Extension"
+              placeholder="ext"
+              value={formData.ext}
+              max={fieldConfigs.ext}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Email
-            </label>
-            <Input
-              id="email"
+            <LimitedInput
               name="email"
-              placeholder="Email"
+              label="Email"
+              placeholder="email"
+              value={formData.email}
+              max={fieldConfigs.email}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -614,8 +902,15 @@ export default function Home() {
               id="driverContact"
               name="driverContact"
               placeholder="Driver Contact"
-              onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
             />
           </div>
 
@@ -630,8 +925,15 @@ export default function Home() {
               id="driverTel"
               name="driverTel"
               placeholder="Driver Tel"
-              onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
             />
           </div>
 
@@ -646,8 +948,15 @@ export default function Home() {
               id="siteContact"
               name="siteContact"
               placeholder="Site Contact (Super)"
-              onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
             />
           </div>
 
@@ -662,41 +971,37 @@ export default function Home() {
               id="siteTel"
               name="siteTel"
               placeholder="Site Tel"
-              onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="address2"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Address (2)
-            </label>
-            <Input
-              id="address2"
+            <LimitedInput
               name="address2"
+              label="Address (2)"
               placeholder="Address (2)"
+              value={formData.address2}
+              max={fieldConfigs.address2}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="col-span-2 flex flex-col space-y-1.5">
-            <label
-              htmlFor="deliveryNotes"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Delivery Notes
-            </label>
-            <textarea
-              id="deliveryNotes"
+            <LimitedInput
               name="deliveryNotes"
+              label="Delivery Notes"
               placeholder="Delivery Notes"
-              rows={2}
+              value={formData.deliveryNotes}
+              max={fieldConfigs.deliveryNotes}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none"
             />
           </div>
 
@@ -716,9 +1021,11 @@ export default function Home() {
                   id="date1"
                   name="date1"
                   placeholder="1) Date"
+                  type="date"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
+                {/* <DatePickerDemo /> */}
               </div>
               <div className="flex flex-col space-y-1.5">
                 <label
@@ -731,6 +1038,7 @@ export default function Home() {
                   id="time1"
                   name="time1"
                   placeholder="Time"
+                  type="time"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
@@ -746,6 +1054,7 @@ export default function Home() {
                   id="date3"
                   name="date3"
                   placeholder="3) Date"
+                  type="date"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
@@ -761,6 +1070,7 @@ export default function Home() {
                   id="time3"
                   name="time3"
                   placeholder="Time"
+                  type="time"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
@@ -775,6 +1085,7 @@ export default function Home() {
                 <Input
                   id="date2"
                   name="date2"
+                  type="date"
                   placeholder="2) Date"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -791,6 +1102,7 @@ export default function Home() {
                   id="time2"
                   name="time2"
                   placeholder="Time"
+                  type="time"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
@@ -806,6 +1118,7 @@ export default function Home() {
                   id="date4"
                   name="date4"
                   placeholder="4) Date"
+                  type="date"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
@@ -820,6 +1133,7 @@ export default function Home() {
                 <Input
                   id="time4"
                   name="time4"
+                  type="time"
                   placeholder="Time"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -835,13 +1149,33 @@ export default function Home() {
             >
               Job # / Equip #
             </label>
-            <Input
-              id="jobNumber"
-              name="jobNumber"
+
+            <Select
               placeholder="Job # / Equip #"
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            />
+              options={jobDetails.map((job) => {
+                return {
+                  label: job.jobOrEquip,
+                  value: job.jobOrEquip,
+                };
+              })}
+              onChange={(value) => {
+                const selectedJob = jobDetails.find(
+                  (job) => job.jobOrEquip === value
+                );
+                if (selectedJob) {
+                  console.log(selectedJob);
+
+                  setFormData((prev) => ({
+                    ...prev,
+                    jobNumber: selectedJob.jobOrEquip,
+                    jobName: selectedJob.jobName,
+                    // jobTask: selectedJob.jobTask,
+                    // officeContact: selectedJob.officeContact,
+                    // officeTel: selectedJob.tel,
+                  }));
+                }
+              }}
+            ></Select>
           </div>
 
           <div className="flex flex-col space-y-1.5">
@@ -851,19 +1185,16 @@ export default function Home() {
             >
               Job Name / Equip Name
             </label>
-            <select
+            <Input
               name="jobName"
               value={formData.jobName}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            >
-              <option value="">-- Select Job Name --</option>
-              <option value="Roundabout">Roundabout</option>
-            </select>
+            />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
+            {/* <label
               htmlFor="jobTask"
               className="text-sm font-medium text-gray-700 dark:text-gray-300"
             >
@@ -872,9 +1203,18 @@ export default function Home() {
             <Input
               id="jobTask"
               name="jobTask"
+              value={formData.jobTask}
               placeholder="Job Task / Use"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            /> */}
+            <LimitedInput
+              name="jobTask"
+              label="Job Task / Use"
+              placeholder="Job Task / Use"
+              value={formData.jobTask}
+              max={fieldConfigs.jobTask}
+              onChange={handleChange}
             />
           </div>
 
@@ -889,7 +1229,15 @@ export default function Home() {
               id="officeContact"
               name="officeContact"
               placeholder="Office Contact"
-              onChange={handleChange}
+              value={formData.officeContact}
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
@@ -905,40 +1253,38 @@ export default function Home() {
               id="officeTel"
               name="officeTel"
               placeholder="Tel"
-              onChange={handleChange}
+              value={formData.officeTel}
+              type="number"
+              onChange={(e) => {
+                if (e.target.value.length >= 10) {
+                  e.target.value = e.target.value.slice(0, 10);
+                  return;
+                }
+                handleChange(e);
+              }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="requestedBy"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Requested By
-            </label>
-            <Input
-              id="requestedBy"
+            <LimitedInput
               name="requestedBy"
+              label="Requested By"
               placeholder="Requested By"
+              value={formData.requestedBy}
+              max={fieldConfigs.requestedBy}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="orderedBy"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Ordered By
-            </label>
-            <Input
-              id="orderedBy"
+            <LimitedInput
               name="orderedBy"
+              label="Ordered By"
               placeholder="Ordered By"
+              value={formData.orderedBy}
+              max={fieldConfigs.orderedBy}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -953,6 +1299,7 @@ export default function Home() {
               id="rightDate"
               name="rightDate"
               placeholder="Date"
+              type="date"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -969,56 +1316,42 @@ export default function Home() {
               id="rightTime"
               name="rightTime"
               placeholder="Time"
+              type="time"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="coCe"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              CO / CE #
-            </label>
-            <Input
-              id="coCe"
+            <LimitedInput
               name="coCe"
+              label="CO / CE #"
               placeholder="CO / CE #"
+              value={formData.coCe}
+              max={fieldConfigs.coCe}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="rightNotes"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Notes
-            </label>
-            <Input
-              id="rightNotes"
+            <LimitedInput
               name="rightNotes"
+              label="Notes"
               placeholder="Notes"
+              value={formData.rightNotes}
+              max={fieldConfigs.rightNotes}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="approxCost"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Approx Cost
-            </label>
-            <Input
-              id="approxCost"
+            <LimitedInput
               name="approxCost"
+              label="Approx Cost"
               placeholder="Approx Cost"
+              value={formData.approxCost}
+              max={fieldConfigs.approxCost}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -1033,12 +1366,13 @@ export default function Home() {
               AMEX
             </label>
             <div className="flex flex-col space-y-1.5">
-              <Input
-                id="amexText"
+              <LimitedInput
                 name="amexText"
+                label="AMEX Details"
                 placeholder="AMEX Details"
+                value={formData.amexText}
+                max={fieldConfigs.amexText}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             </div>
             <label className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
@@ -1069,12 +1403,13 @@ export default function Home() {
               <span>Other</span>
             </label>
             <div className="flex flex-col space-y-1.5">
-              <Input
-                id="otherText"
+              <LimitedInput
                 name="otherText"
+                label="Other Details"
                 placeholder="Other Details"
+                value={formData.otherText}
+                max={fieldConfigs.otherText}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             </div>
           </div>
@@ -1189,98 +1524,68 @@ export default function Home() {
           )}
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="ccPo"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              CC PO to Grade Team
-            </label>
-            <Input
-              id="ccPo"
+            <LimitedInput
               name="ccPo"
+              label="CC PO to Grade Team"
               placeholder="CC PO to Grade Team"
+              value={formData.ccPo}
+              max={fieldConfigs.ccPo}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="author"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Author
-            </label>
-            <Input
-              id="author"
+            <LimitedInput
               name="author"
+              label="Author"
               placeholder="Author"
+              value={formData.author}
+              max={fieldConfigs.author}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="authorSignature"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Author Signature
-            </label>
-            <Input
-              id="authorSignature"
+            <LimitedInput
               name="authorSignature"
+              label="Author Signature"
               placeholder="Author Signature"
+              value={formData.authorSignature}
+              max={fieldConfigs.authorSignature}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="pmName"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              PM Name
-            </label>
-            <Input
-              id="pmName"
+            <LimitedInput
               name="pmName"
+              label="PM Name"
               placeholder="PM Name"
+              value={formData.pmName}
+              max={fieldConfigs.pmName}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="pmSignature"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              PM Signature
-            </label>
-            <Input
-              id="pmSignature"
+            <LimitedInput
               name="pmSignature"
+              label="PM Signature"
               placeholder="PM Signature"
+              value={formData.pmSignature}
+              max={fieldConfigs.pmSignature}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label
-              htmlFor="approvedBy"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Approved By
-            </label>
-            <Input
-              id="approvedBy"
+            <LimitedInput
               name="approvedBy"
+              label="Approved By"
               placeholder="Approved By"
+              value={formData.approvedBy}
+              max={fieldConfigs.approvedBy}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -1295,24 +1600,20 @@ export default function Home() {
               id="approvedDate"
               name="approvedDate"
               placeholder="Approved Date"
+              type="date"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="col-span-2 flex flex-col space-y-1.5">
-            <label
-              htmlFor="rightBottomNotes"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Notes (bottom)
-            </label>
-            <textarea
-              id="rightBottomNotes"
+            <LimitedInput
               name="rightBottomNotes"
+              label="Notes (bottom)"
               placeholder="Notes (bottom)"
+              value={formData.rightBottomNotes}
+              max={fieldConfigs.rightBottomNotes}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -1534,6 +1835,7 @@ export default function Home() {
               id="subtotal"
               name="subtotal"
               placeholder="Subtotal"
+              type="number"
               value={formData.subtotal}
               disabled
               onChange={handleChange}
@@ -1551,6 +1853,7 @@ export default function Home() {
             <Input
               id="delivery"
               name="delivery"
+              type="number"
               placeholder="Delivery"
               value={formData.delivery}
               onChange={handleChange}
@@ -1569,6 +1872,7 @@ export default function Home() {
               id="salesTax"
               name="salesTax"
               placeholder="Sales Tax"
+              type="number"
               value={formData.salesTax}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -1585,6 +1889,7 @@ export default function Home() {
             <Input
               id="bottomOther"
               name="bottomOther"
+              type="number"
               placeholder="Other"
               value={formData.bottomOther}
               onChange={handleChange}
@@ -1637,6 +1942,7 @@ export default function Home() {
               id="signDate"
               name="signDate"
               placeholder="Date"
+              type="date"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -1650,8 +1956,72 @@ export default function Home() {
             Download Filled PDF
           </button>
         </form>
-       
       </div>
     </>
   );
 }
+
+type LimitedInputProps = {
+  name: string;
+  value: string;
+  max: number;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
+  placeholder?: string;
+  label?: string;
+};
+
+const LimitedInput = ({
+  name,
+  value,
+  max,
+  onChange,
+  placeholder,
+  label,
+}: LimitedInputProps) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const limitedValue = e.target.value.slice(0, max);
+
+    const customEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        value: limitedValue,
+        name,
+      },
+    };
+
+    onChange(customEvent as React.ChangeEvent<HTMLInputElement>);
+  };
+
+  return (
+    <div className="flex flex-col space-y-1.5 relative">
+  {label &&
+    (label !== "AMEX Details" && label !== "Other Details" ? (
+      <label
+        htmlFor={name}
+        className="text-sm font-medium text-gray-700 dark:text-gray-300"
+      >
+        {label}
+      </label>
+    ) : null)}
+  <input
+  id={name}
+  name={name}
+  value={value}
+  onChange={handleChange}
+  placeholder={placeholder}
+  className="w-full px-3 py-2 pr-16 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[#0f172a] text-gray-900 dark:text-gray-100"
+/>
+
+  <span className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400">
+    {value.length} / {max}
+  </span>
+</div>
+
+  );
+};
+
