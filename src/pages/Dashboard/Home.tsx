@@ -3,8 +3,8 @@ import PageMeta from "../../components/common/PageMeta";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import Input from "../../components/form/input/InputField";
 import Select from "../../components/form/Select";
-import { Modal } from "../../components/ui/modal";
-import AddVendorModalContent from "./Modal";
+// import { Modal } from "../../components/ui/modal";
+// import AddVendorModalContent from "./Modal";
 // import { format, parse } from 'date-fns';
 // import { DatePickerDemo } from "./DatePicker";
 
@@ -66,7 +66,7 @@ export default function Home() {
     jobName: "",
     jobTask: "",
     officeContact: "",
-    officeTel: "",
+    officeTel: "(973) 925-4021",
     requestedBy: "",
     orderedBy: "",
     rightDate: "",
@@ -119,18 +119,19 @@ export default function Home() {
     attention: 45,
     ext: 6,
     email: 50,
-    deliveryNotes: 40,
+    deliveryNotes: 75,
     requestedBy: 15,
     orderedBy: 15,
     coCe: 15,
-    rightNotes: 20,
+    rightNotes: 75,
     approxCost: 15,
-    amexText: 20,
+    amexText: 30,
     otherText: 20,
-    ccPo: 35,
+    ccPo: 80,
     author: 18,
     authorSignature: 20,
-    address2: 85,
+    address2: 100,
+    jobTask: 100,
     pmName: 18,
     pmSignature: 22,
     approvedBy: 20,
@@ -141,54 +142,101 @@ export default function Home() {
   const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
 
   const [vendorDetails, setVendorDetails] = useState<
-    {
-      vendor: string;
-      address1: string;
-    }[]
-  >([
-    {
-      vendor: "Vendor 1",
-      address1:
-        "1234 Westwood Drive, Apt 502, Sunset Park Brooklyn, New York 11220, USA",
-    },
-    {
-      vendor: "Vendor 2",
-      address1:
-        "5678 Elm Street, Apt 101, Sunset Park Brooklyn, New York 11220, USA",
-    },
-    {
-      vendor: "Vendor 3",
-      address1:
-        "91011 Maple Avenue, Apt 202, Sunset Park Brooklyn, New York 11220, USA",
-    },
-    {
-      vendor: "Vendor 4",
-      address1:
-        "1213 Oak Lane, Apt 303, Sunset Park Brooklyn, New York 11220, USA",
-    },
-  ]);
-  // console.log(vendorDetails);
 
+  
   const jobDetails: {
     jobOrEquip: string;
     jobName: string;
   }[] = [
     {
-      jobOrEquip: "Job 1",
-      jobName: "Job Name 1 sds dsdf dsfsddfssds",
+      jobOrEquip: "22-304",
+      jobName: "Thornall",
+    },
+    { jobOrEquip: "22-312", jobName: "Colonial" },
+    { jobOrEquip: "23-286", jobName: "HL-48" },
+    {
+      jobOrEquip: "23-292",
+      jobName: "Roundabout",
     },
     {
-      jobOrEquip: "Job 2",
-      jobName: "Job Name 2asdaf fdfsd fdsfsd fdsfsdfsd",
+      jobOrEquip: "24-115",
+      jobName: "Madison",
     },
+
     {
-      jobOrEquip: "Job 3",
-      jobName: "Job Name 3",
+      jobOrEquip: "24-242",
+      jobName: "Main St.",
     },
-    {
-      jobOrEquip: "Job 4",
-      jobName: "Job Name 4",
-    },
+    { jobOrEquip: "24-311", jobName: "New Providence" },
+    { jobOrEquip: "24-302", jobName: "Johnson Park" },
+    { jobOrEquip: "24-316", jobName: "Green Lane Park" },
+    { jobOrEquip: "24-363", jobName: "Barnegat" },
+    { jobOrEquip: "24-371", jobName: "Doty" },
+    { jobOrEquip: "24-367", jobName: "Lower Road" },
+    { jobOrEquip: "24-380", jobName: "Concrete South" },
+    { jobOrEquip: "24-417", jobName: "Glenside" },
+    { jobOrEquip: "25-154", jobName: "Rt. 15" },
+  ];
+
+  // const taxExemptFiles: { [jobOrEquip: string]: string } = {
+  //   "20-1209": "/tax-exempt/20-1209 ST-13 BLANK Burn Building.pdf",
+  //   "20-1242": "/tax-exempt/20-1242 ST-13 BLANK East 25th.pdf",
+  //   "21-1545": "/tax-exempt/21-1545 ST-13 BLANK Bridge HL-45 & 46.pdf",
+  //   "22-152": "/tax-exempt/22-152 ST-13 BLANK Water Main.pdf",
+  //   "22-173": "/tax-exempt/22-173 ST-13 BLANK Downtown Streetscape.pdf",
+  //   "22-197": "/tax-exempt/22-197 ST-13 BLANK Jernee Mill.pdf",
+  //   "22-231": "/tax-exempt/22-231 ST-13 BLANK Gravesite.pdf",
+  //   "22-252": "/tax-exempt/22-252 ST-13 BLANK Downtown Streetscape 3.pdf",
+  //   "22-304": "/tax-exempt/22-304 ST-13 BLANK Thornall St.pdf",
+  //   "22-312": "/tax-exempt/22-312 ST-13 BLANK Colonial Dr.pdf",
+  //   "23-286": "/tax-exempt/23-286 ST-13 BLANK Bridge X-48.pdf",
+  //   "23-292": "/tax-exempt/23-292 ST-13 BLANK Roundabout Princeton.pdf",
+  //   "24-115": "/tax-exempt/24-115 ST-13 BLANK Madison St.pdf",
+  //   "24-242": "/tax-exempt/24-242 ST-13 BLANK Main St.pdf",
+  //   "24-302": "/tax-exempt/24-302 ST-13 BLANK Johnson Park Field 8.pdf",
+  //   "24-308": "/tax-exempt/24-308 ST-13 BLANK South Maintenance.pdf",
+  //   "24-311": "/tax-exempt/24-311 ST-13 BLANK New Providence Bridge.pdf",
+  //   "24-316": "/tax-exempt/24-316 ST-13 BLANK Green Lane.pdf",
+  //   "24-363": "/tax-exempt/24-363 ST-13 BLANK Barnegat Branch Trail.pdf",
+  //   "24-367": "/tax-exempt/24-367 ST-13 BLANK Lower Minor Road.pdf",
+  //   "24-371": "/tax-exempt/24-371 ST-13 BLANK Doty Road.pdf",
+  //   "24-417": "/tax-exempt/24-417 ST-13 BLANK Glenside Ave.pdf",
+  //   "25-119": "/tax-exempt/25-119 ST-13 BLANK Johnson Park Sports Complex.pdf",
+  //   "25-154": "/tax-exempt/25-154 ST-13 BLANK Route 15 Bridge.pdf",
+  //   // Optional fallback
+  //   default: "",
+  // };
+
+  const teamMembers = [
+    // Office Staff
+    { value: "Aditya N", label: "Aditya (Adi) Nakrani" },
+    { value: "Christopher S", label: "Christopher Squirlock" },
+    { value: "Maria S", label: "Maria Squirlock" },
+    { value: "Mohit R", label: "Mohit Ruhil" },
+    { value: "Nimanshu B", label: "Nimanshu Bhanderi" },
+    { value: "Ralph D", label: "Ralph Diaco" },
+    { value: "Michael L", label: "Michael Loia" },
+    { value: "Rissa P", label: "Rissa Privitera" },
+    { value: "Robert J", label: "Robert (Bob) Janecek" },
+
+    // Field Staff
+    { value: "Pablo S", label: "Pablo Sousa" },
+    { value: "Henil S", label: "Henil Shah" },
+    { value: "Dev M", label: "Dev Moradia" },
+    { value: "Deep S", label: "Deep Shah" },
+    { value: "Goncalo D", label: "Goncalo (G) Duarte" },
+    { value: "Adenilson F", label: "Adenilson (Nilson) Fernandes" },
+    { value: "Anderson F", label: "Anderson Fonseca" },
+    { value: "Edilson D", label: "Edilson (Eddie) DaSilva" },
+    { value: "Joao C", label: "Joao (John) Corticeiro" },
+    { value: "Patrick A", label: "Patrick Araujo" },
+    { value: "Luigi C", label: "Luigi Catalanotto" },
+    { value: "Manuel C", label: "Manuel (Anthony) Castro" },
+    { value: "Humberto D", label: "Humberto DeCarvalho" },
+    { value: "Jamie P", label: "Jamie Phemsint" },
+    { value: "John L", label: "John LaRiccia" },
+    { value: "Mario C", label: "Mario Costa" },
+    { value: "Victor P", label: "Victor Pinho" },
   ];
 
   const handleChange = (
@@ -226,7 +274,7 @@ export default function Home() {
     ) {
       updatedItems[index].total = (quantity * unitCost).toFixed(2);
     } else {
-      updatedItems[index].total = "0.00"; // fallback
+      updatedItems[index].total = ""; // fallback
     }
     setFormData({ ...formData, lineItems: updatedItems });
   };
@@ -248,8 +296,8 @@ export default function Home() {
     // Update formData with new calculated values
     setFormData((prevState) => ({
       ...prevState,
-      subtotal: subtotal.toFixed(2),
-      grandTotal: grandTotal.toFixed(2),
+      subtotal: subtotal > 0 ? subtotal.toFixed(2) : "",
+      grandTotal: grandTotal > 0 ? grandTotal.toFixed(2) : "",
     }));
   }, [
     formData.lineItems,
@@ -259,14 +307,12 @@ export default function Home() {
   ]);
 
   const generatePdf = async () => {
-    const existingPdfBytes = await fetch(
-      `${import.meta.env.BASE_URL}/company-template.pdf`
-    ).then((res) => res.arrayBuffer());
+    const existingPdfBytes = await fetch("/assets/company-template.pdf").then((res) =>
+      res.arrayBuffer()
+    );
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const page = pdfDoc.getPages()[0];
-
-    console.log(formData.attention);
 
     const drawWrappedText = (
       text: string,
@@ -358,6 +404,35 @@ export default function Home() {
 
       return linesUsed;
     };
+    const drawWrappedJob = (
+      text: string,
+      x: number,
+      y: number,
+      maxWidth: number,
+      initialFontSize = 10,
+      minFontSize = 5,
+      color = rgb(0, 0, 0)
+    ): void => {
+      if (!text || typeof text !== "string") return;
+
+      let fontSize = initialFontSize;
+      let textWidth = font.widthOfTextAtSize(text, fontSize);
+
+      // Reduce font size until it fits or hits the minimum
+      while (textWidth > maxWidth && fontSize > minFontSize) {
+        fontSize -= 0.5;
+        textWidth = font.widthOfTextAtSize(text, fontSize);
+      }
+
+      // Draw the resized text
+      page.drawText(text, {
+        x,
+        y,
+        size: fontSize,
+        font,
+        color,
+      });
+    };
 
     const draw = (text: string, x: number, y: number) => {
       if (!text || typeof text !== "string") return;
@@ -369,6 +444,7 @@ export default function Home() {
         color: rgb(0, 0, 0),
       });
     };
+
     const form = pdfDoc.getForm();
     const drawCheckbox = (
       name: string,
@@ -409,21 +485,56 @@ export default function Home() {
       font: boldFont,
       color: formData.masterPO ? rgb(1, 0, 0) : rgb(1, 0, 0), // red if masterPO
     });
+    const formatDate = (dateStr: string) => {
+      if (!dateStr) return "";
 
-    const formatDateToDMY = (dateStr: string) => {
-      const [year, month, day] = dateStr.split("-");
-      return `${month}/${day}/${year}`;
+      const [year, month, day] = dateStr.split("-").map(Number);
+
+      // Check if the date is valid
+      const date = new Date(year, month - 1, day);
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return ""; // Invalid date
+      }
+
+      const mm = String(month).padStart(2, "0");
+      const dd = String(day).padStart(2, "0");
+      const yy = String(year).slice(-2);
+      return `${mm}/${dd}/${yy}`;
     };
+    // Optional - handles MM/DD/YYYY if needed
+    const formattedDate = (dateStr: string) => {
+      if (!dateStr) return "";
 
-    const convertToAmPm = (time: string): string => {
-      if (!time) return "";
+      const [year, month, day] = dateStr.split("-").map(Number);
 
-      const [hours, minutes] = time.split(":").map(Number);
-      const amPm = hours >= 12 ? "PM" : "AM";
-      const adjustedHours = hours % 12 || 12;
+      // Check if the date is valid
+      const date = new Date(year, month - 1, day);
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return ""; // Invalid date
+      }
 
-      return `${adjustedHours}:${minutes.toString().padStart(2, "0")} ${amPm}`;
+      // Create date in local time (month is 0-indexed)
+      const dateObj = new Date(year, month - 1, day);
+      return dateObj.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
     };
+    function formatPhone(rawTel: string = "") {
+      const digits = rawTel.replace(/\D/g, "").slice(0, 10);
+      if (digits.length < 10) return ""; // fallback if incomplete
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
 
     formData.time1 = convertToAmPm(formData.time1);
     formData.time2 = convertToAmPm(formData.time2);
@@ -444,11 +555,12 @@ export default function Home() {
       : "";
 
     draw(formData.date, 78, 703);
+
     draw(formData.vendor, 78, 688);
     // draw(formData.address1, 78, 673);
     drawWrappedText(formData.address1, 78, 673, 180);
     draw(formData.attention, 78, 643);
-    draw(formData.tel, 78, 628);
+    draw(formatPhone(formData.tel), 78, 628);
     draw(formData.ext, 244, 628);
     draw(formData.email, 78, 613);
 
@@ -458,17 +570,17 @@ export default function Home() {
     drawCheckbox("checkbox.shipTo", formData.shipTo, 160, 580);
 
     draw(formData.driverContact, 98, 565);
-    draw(formData.driverTel, 215, 565);
+    draw(formatPhone(formData.driverTel), 215, 565);
     draw(formData.siteContact, 115, 550);
-    draw(formData.siteTel, 215, 550);
+    draw(formatPhone(formData.siteTel), 215, 550);
     drawWrappedText(formData.address2, 88, 538, 180);
     draw(formData.deliveryNotes, 97, 507);
 
     const drawHighlightedText = (
-      text: string,
+      text: string | undefined,
       x: number,
       y: number,
-      width = 32
+      width = 30
     ) => {
       if (!text || text.trim() === "") return;
 
@@ -476,31 +588,42 @@ export default function Home() {
         x: x,
         y: y - 3,
         width,
-        height: 11,
+        height: 10,
         color: rgb(1, 1, 0),
       });
 
       draw(text, x, y);
     };
 
-    drawHighlightedText(formData.date1, 60, 476);
-    drawHighlightedText(formData.time1, 119, 476);
-    drawHighlightedText(formData.date2, 60, 462);
-    drawHighlightedText(formData.time2, 119, 462);
-    drawHighlightedText(formData.date3, 187, 476);
-    drawHighlightedText(formData.time3, 250, 476);
+    const formatTime12Hour = (timeStr: string) => {
+      if (!timeStr || !timeStr.includes(":")) return "";
+      const [hourStr, minuteStr] = timeStr.split(":");
+      const hour = parseInt(hourStr, 10);
+      const minute = parseInt(minuteStr, 10);
 
-    drawHighlightedText(formData.date4, 187, 462);
-    drawHighlightedText(formData.time4, 250, 462);
+      const ampm = hour >= 12 ? "PM" : "AM";
+      const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+
+      return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
+    };
+
+    drawHighlightedText(formatDate(formData.date1), 65, 476);
+    drawHighlightedText(formatTime12Hour(formData.time1), 122, 476);
+    drawHighlightedText(formatDate(formData.date2), 65, 462);
+    drawHighlightedText(formatTime12Hour(formData.time2), 122, 462);
+    drawHighlightedText(formatDate(formData.date3), 190, 476);
+    drawHighlightedText(formatTime12Hour(formData.time3), 250, 476);
+    drawHighlightedText(formatDate(formData.date4), 190, 462);
+    drawHighlightedText(formatTime12Hour(formData.time4), 250, 462);
 
     draw(formData.jobNumber, 400, 703);
-    draw(formData.jobName, 400, 688);
+    drawWrappedJob(formData.jobName, 400, 688, 180, 10, 5, rgb(0, 0, 0));
     draw(formData.jobTask, 400, 673);
     draw(formData.officeContact, 380, 658);
-    draw(formData.officeTel, 495, 658);
+    draw(formatPhone(formData.officeTel), 495, 658);
     draw(formData.requestedBy, 370, 643);
     draw(formData.orderedBy, 495, 643);
-    draw(formData.rightDate, 360, 628);
+    draw(formatDate(formData.rightDate), 360, 628);
     draw(formData.rightTime, 495, 628);
     draw(formData.coCe, 360, 613);
     draw(formData.rightNotes, 478, 613);
@@ -525,31 +648,94 @@ export default function Home() {
     draw(formData.pmName, 350, 505);
     draw(formData.pmSignature, 478, 505);
     draw(formData.approvedBy, 365, 490);
-    draw(formData.approvedDate, 525, 490);
+    draw(formatDate(formData.approvedDate), 525, 490);
     draw(formData.rightBottomNotes, 335, 476);
+    
 
-    const startY = 430;
+    
+    const drawShrinkToFit = (
+      text: string,
+      x: number,
+      y: number,
+      maxWidth: number,
+      baseFontSize: number = 10,
+      minFontSize: number = 4
+    ) => {
+      if (!text) return;
+    
+      let fontSize = baseFontSize;
+      let width =font.widthOfTextAtSize(text, fontSize);
+    
+      while (width > maxWidth && fontSize > minFontSize) {
+        fontSize -= 0.5;
+        width = font.widthOfTextAtSize(text, fontSize);
+      }
+    
+      page.drawText(text, {
+        x,
+        y,
+        size: fontSize,
+        font: font,
+      });
+
+      
+    };
+    
+    const startY = 429;
     let currentY = startY;
+// drawWrappedText should return at least 1, even if text fits in one line
+const drawWrappedtext = (
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  fontSize: number = 10
+): number => {
+  if (!text) return 1;
+
+  const words = text.split(/\s+/);
+  let line = '';
+  let linesUsed = 0;
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line ? `${line} ${words[i]}` : words[i];
+    const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+    if (testWidth <= maxWidth) {
+      line = testLine;
+    } else {
+      page.drawText(line, { x, y: y - linesUsed * lineHeight, size: fontSize, font: font });
+      linesUsed++;
+      line = words[i];
+    }
+  }
+
+  // Draw the last line
+  if (line) {
+    page.drawText(line, { x, y: y - linesUsed * lineHeight, size: fontSize, font: font });
+    linesUsed++;
+  }
+
+  return linesUsed; // Don't add +1 outside
+};
 
     formData.lineItems.forEach((item) => {
-      const linesUsed = drawWrappedText(
-        item.description,
-        35,
-        currentY,
-        180,
-        rowHeight
-      );
-      draw(item.quantity, 245, currentY);
-      draw(item.um, 275, currentY);
-      draw(`${item.unitCost}`, 300, currentY); //dollar in string
-      draw(`${item.total}`, 340, currentY); //dollar in string
-      draw(item.jobEquipNotes, 390, currentY);
-      draw(item.costCode, 510, currentY);
-      draw(item.payItem, 560, currentY);
+      const linesUsed = drawWrappedtext(item.description, 35, currentY, 180, rowHeight); // Description can still wrap
+    
+      drawShrinkToFit(item.quantity, 245, currentY, 20);
+      drawShrinkToFit(item.um, 275, currentY, 20);
+      drawShrinkToFit(parseFloat(item.unitCost) > 0 ? `$${item.unitCost}` : '', 294, currentY, 35);
+      drawShrinkToFit(parseFloat(item.total) > 0 ? `$${item.total}` : '', 334, currentY, 35);
+      drawShrinkToFit(item.jobEquipNotes, 390, currentY, 100);
+      drawShrinkToFit(item.costCode, 510, currentY, 40);
+      drawShrinkToFit(item.payItem, 560, currentY, 40);
+    
+      // Only description wraps, so use its height
+      currentY -= linesUsed * rowHeight;
 
-      // Move Y down for the next item based on wrapped height
-      currentY -= (linesUsed + 1) * rowHeight;
     });
+    
 
     // formData.lineItems.forEach((item, idx) => {
     //   const y = startY - idx * rowHeight;
@@ -563,52 +749,370 @@ export default function Home() {
     //   draw(item.payItem, 560, y);
     // });
 
-    draw(`${formData.subtotal}`, 335, 123);//dollar in string
-    draw(`${formData.delivery}`, 335, 108);//dollar in string
-    draw(`${formData.salesTax}`, 335, 93);//dollar in string
-    draw(`${formData.bottomOther}`, 335, 78);//dollar in string
-    draw(`${formData.grandTotal}`, 335, 63);//dollar in string
+    draw(
+      parseFloat(formData.subtotal) > 0 ? `$${formData.subtotal}` : "",
+      335,
+      123
+    ); //dollar in string
+    draw(
+      parseFloat(formData.delivery) > 0 ? `$${formData.delivery}` : "",
+      335,
+      108
+    ); //dollar in string
+    draw(
+      parseFloat(formData.salesTax) > 0 ? `$${formData.salesTax}` : "",
+      335,
+      93
+    ); //dollar in string
+    draw(
+      parseFloat(formData.bottomOther) > 0 ? `$${formData.bottomOther}` : "",
+      335,
+      78
+    ); //dollar in string
+    draw(
+      parseFloat(formData.grandTotal) > 0 ? `$${formData.grandTotal}` : "",
+      335,
+      63
+    ); //dollar in string
 
     draw(formData.sign, 33, 28);
-    draw(formData.signDate, 270, 28);
+    draw(formatDate(formData.signDate), 270, 28);
+
+    const taxExemptDataByJob: {
+      [jobNumber: string]: {
+        governmentEntity: string;
+        address1: string;
+        address2: string;
+        category:
+          | "Governmental Entity"
+          | "Exempt Organization"
+          | "Qualified Housing Sponsor";
+        exemptNumber?: string;
+      };
+    } = {
+      "20-1209": {
+        governmentEntity: "County of Hunterdon",
+        address1: "71 Main Street, Administration Bldg, Flemington, NJ 08822",
+        address2:
+          "Construction of Burn Building and Site Work for the Hunterdon County Emergency Services Training Center",
+        category: "Governmental Entity",
+      },
+      "20-1242": {
+        governmentEntity: "City of Bayonne, Borough Hall",
+        address1: "25 W. 38th Street, Bayonne, NJ 07002",
+        address2: "316 Avenue E (adjacent to jobsite), Bayonne, NJ 07002",
+        category: "Governmental Entity",
+      },
+      "21-1545": {
+        governmentEntity:
+          "County of Monmouth Department of Public Works & Engineering",
+        address1: "One East Main Street, Freehold, NJ 07728",
+        address2:
+          "Replacement Of Bridge HL-45 & HL 46, 137 Allaire Road, Howell, NJ 07727",
+        category: "Governmental Entity",
+      },
+      "22-152": {
+        governmentEntity: "Passaic Valley Water Commission",
+        address1: "1525 Main Avenue, Clifton NJ 07011",
+        address2:
+          "Water Transmission Main Improvements Industrial Loop, (3 locations - no street addresses), Paterson, NJ",
+        category: "Governmental Entity",
+      },
+      "22-173": {
+        governmentEntity: "Township of Little Falls",
+        address1: "225 Main Street, Little Falls, NJ 07424",
+        address2:
+          "Downtown Streetscape Improvements Section 4 - 44 Main Street, Little Falls, NJ 07424",
+        category: "Governmental Entity",
+      },
+      "22-197": {
+        governmentEntity: "County of Middlesex",
+        address1: "75 Bayard Street, New Brunswick NJ 08901",
+        address2:
+          "22-197 Replace Culvert 3-C-73 Jernee Mill Road, 575 Jernee Mill Rd, Sayreville NJ 08872",
+        category: "Governmental Entity",
+      },
+      "22-231": {
+        governmentEntity: "The Department of Military & Veterans Affairs",
+        address1: "PO Box 340, Trenton, NJ 08625-0340",
+        category: "Exempt Organization",
+        exemptNumber: "216000928",
+        address2:
+          "Gravesite Expansion & Site Improvements at William Doyle Cemetery - 350 Province Line Rd, Wrightstown, NJ 08562",
+      },
+      "22-252": {
+        governmentEntity: "Township of Little Falls",
+        address1: "225 Main Street, Little Falls, NJ 07424",
+        address2:
+          "SECTION 3 Downtown Streetscape Improvements - 44 Main Street, Little Falls, NU 07424",
+        category: "Governmental Entity",
+      },
+      "22-304": {
+        governmentEntity: "County of Middlesex",
+        address1: "75 Bayard Street, New Brunswick NJ 08901",
+        address2:
+          "Replacement of Culvert 1-C-87 Thornall St Over Tributary of Rahway River - 561 Thornall Street, Edison, New Jersey 08837",
+        category: "Governmental Entity",
+      },
+      "22-312": {
+        governmentEntity: "County of Ocean",
+        address1: "101 Hooper Avenue, Toms River, NJ 08753",
+        address2:
+          "Replacement of Colonial Drive Bridges - 21 Colonial Drive, Manchester, New Jersey 08759",
+        category: "Governmental Entity",
+      },
+      "23-286": {
+        governmentEntity: "County of Sussex",
+        address1: "One Spring Street, Newton, NJ 07860",
+        address2:
+          "Replacement of Sussex County Bridge X-48, 1198 NJ-23, Wantage, NJ 07461",
+        category: "Governmental Entity",
+      },
+      "23-292": {
+        governmentEntity: "Mercer County",
+        address1: "640 South Broad Street, Trenton, NJ 08650",
+        address2: "1738 Princeton Ave, Lawrence Township, NJ 08650",
+        category: "Governmental Entity",
+      },
+      "24-115": {
+        governmentEntity: "North Hudson Sewerage Authority",
+        address1: "1600 Adams Street, Hoboken, NJ 07030",
+        category: "Governmental Entity",
+        address2:
+          "Madison Street area Infrastructure Improvements Phase 2 - 824 Madison Street, Hoboken, NJ 07030",
+      },
+      "24-242": {
+        governmentEntity: "County of Middlesex",
+        address1: "75 Bayard Street, New Brunswick, NJ 08954",
+        address2:
+          "Improvements to the Intersection of Main St (RT 670) and Crossman Rd - 14 Crossman Road, Sayreville, NJ 08872",
+        category: "Governmental Entity",
+      },
+      "24-302": {
+        governmentEntity: "Byram Township",
+        address1: "10 Mansfield Drive, Stanhope, NJ 07874",
+        address2:
+          "Johnson Park Field 8 Reconstruction - 117 Roseville Rd, Byram Township, New Jersey 07821",
+        category: "Governmental Entity",
+      },
+      "24-311": {
+        governmentEntity: "Borough of New Providence",
+        address1: "360 Elkwood Avenue, New Providence, NJ 07974",
+        address2:
+          "Bridge at New Providence Community Pool Replacement - 1378 Springfield Ave, New Providence, NJ 07974",
+        category: "Governmental Entity",
+      },
+      "24-316": {
+        governmentEntity: "Union County Improvement Authority",
+        address1: "10 Elizabeth town Plaza, 5th Floor, Elizabeth, NJ 07207",
+        address2:
+          "Green Lane Park Improvements - 520 Green Lane, Union, New Jersey 07083",
+        category: "Governmental Entity",
+      },
+      "24-363": {
+        governmentEntity: "County of Ocean",
+        address1: "101 Hooper Avenue, Toms River, NJ 08753",
+        address2:
+          "Barnegat Branch Trail Phase IX Construction - 225 Atlantic City Blvd, Toms River, NJ 08757",
+        category: "Governmental Entity",
+      },
+      "24-367": {
+        governmentEntity: "County of Union",
+        address1: "2325 South Avenue, Scotch Plains, NJ 07076",
+        address2:
+          "Replacement of Lower Minor Road Bridge (Li-63) - 1301 Lower Road, Linden, NJ 07036",
+        category: "Governmental Entity",
+      },
+      "24-371": {
+        governmentEntity: "County of Passaic",
+        address1: "401 Grand Street, Paterson, NJ 07505",
+        address2:
+          "Replacement of Doty Road Bridge - 140 Doty Road, Haskell, NJ 07420",
+        category: "Governmental Entity",
+      },
+      "24-380": {
+        governmentEntity: "NJ Department of Transportation",
+        address1: "1035 Parkway Avenue, Trenton, NJ 08625",
+        address2:
+          "Maintenance Concrete Structural Repair - South, 2025, South Region, NJ",
+        category: "Governmental Entity",
+      },
+      "24-417": {
+        governmentEntity: "Union County Improvement Authority",
+        address1: "10 Elizabeth town Plaza, 5th Floor, Elizabeth, NJ 07207",
+        address2:
+          "Glenside Avenue Park Improvements - 175 Glenside Avenue, Scotch Plains, NU 07076",
+        category: "Governmental Entity",
+      },
+      "25-119": {
+        governmentEntity: "City of Hackensack",
+        address1: "65 Central Avenue, Hackensack, NJ 07601",
+        address2:
+          "Johnson Park Sports Complex Site/Utility Improvements - 452 River St, Hackensack, NJ 07601",
+        category: "Governmental Entity",
+      },
+      "25-154": {
+        governmentEntity: "NJ Department of Transportation",
+        address1: "1035 Parkway Avenue, Trenton, NJ 08625",
+        address2:
+          "Route 15 Bridge Replacement Over Paulins Kill - 115 Lafayette Road, Lafayette, NJ 07848",
+        category: "Governmental Entity",
+      },
+    };
 
     if (formData.taxExemptYes) {
-      const extraPdfBytes = await fetch(
-        `${import.meta.env.BASE_URL}/tax-exempt.pdf`
-      ).then((res) => res.arrayBuffer());
+      // Use the common tax-exempt form for all jobs
+      const taxExemptPdfPath = "/assets/tax-exempt/tax-exempt.pdf";
+
+      const extraPdfBytes = await fetch(taxExemptPdfPath).then((res) =>
+        res.arrayBuffer()
+      );
       const extraPdf = await PDFDocument.load(extraPdfBytes);
       const copiedPages = await pdfDoc.copyPages(
         extraPdf,
         extraPdf.getPageIndices()
       );
 
+      // Load the signature image
+      const signatureBytes = await fetch(
+        "/assets/tax-exempt/CS Signature for Tax Cert.jpg"
+      ).then((res) => res.arrayBuffer());
+      const signatureImage = await pdfDoc.embedJpg(signatureBytes);
+
+      // Embed font
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+      // Signature image coordinates
+      const imgWidth = 100;
+      const imgHeight = 12;
+      const imgX = 160;
+      const imgY = 87;
+
+      // Get extra tax-exempt data based on job number
+      const extraData = taxExemptDataByJob[formData.jobNumber];
+
+      const crossPositions: Record<string, { x: number; y: number }> = {
+        "Governmental Entity": { x: 76, y: 362 },
+        "Exempt Organization": { x: 77, y: 460 },
+        "Qualified Housing Sponsor": { x: 76, y: 286 },
+      };
+
       copiedPages.forEach((page, index) => {
-        // Only draw on page 0
         if (index === 0) {
-          page.drawText(formData.vendor, {
-            x: 100,
-            y: 620,
+          // Draw common fields
+          page.drawText(formData.vendor, { x: 100, y: 633, font, size: 9 });
+          page.drawText(formatDate(formData.date), {
+            x: 445,
+            y: 633,
             font,
-            size: 11,
+            size: 9,
           });
-          page.drawText(formData.date, {
-            x: 430,
-            y: 620,
-            font,
-            size: 11,
+          page.drawText(formData.address1, { x: 100, y: 603, font, size: 9 });
+
+          // Draw extra job-based tax-exempt info
+          if (extraData) {
+            const {
+              category,
+              address1,
+              address2,
+              governmentEntity,
+              exemptNumber,
+            } = extraData;
+
+            // Address 2 always appears
+            page.drawText(address2, { x: 75, y: 190, font, size: 9 });
+
+            if (category === "Exempt Organization") {
+              // Top section specific to exempt org
+              page.drawText(governmentEntity, {
+                x: 270,
+                y: 440,
+                font,
+                size: 9,
+              });
+              page.drawText(address1, { x: 270, y: 419, font, size: 9 });
+
+              // Optional exempt number
+              if (exemptNumber) {
+                page.drawText(exemptNumber, {
+                  x: 270,
+                  y: 395,
+                  font,
+                  size: 9,
+                });
+              }
+            }
+
+            if (category === "Qualified Housing Sponsor") {
+              // Lower section for housing sponsors
+              page.drawText(address1, { x: 270, y: 268, font, size: 9 });
+              page.drawText(governmentEntity, {
+                x: 270,
+                y: 246,
+                font,
+                size: 9,
+              });
+            }
+
+            if (category === "Governmental Entity") {
+              // Only middle section for government entities
+              page.drawText(governmentEntity, {
+                x: 270,
+                y: 343,
+                font,
+                size: 9,
+              });
+              page.drawText(address1, { x: 270, y: 320, font, size: 9 });
+            }
+
+            // Draw the "X" in the right checkbox
+            const crossCoord = crossPositions[category];
+            if (crossCoord) {
+              page.drawText("x", {
+                x: crossCoord.x,
+                y: crossCoord.y,
+                font,
+                size: 12,
+              });
+            }
+          }
+
+          const staticDetails = [
+            { text: "03-0502857/000", x: 425, y: 700 },
+            {
+              text: "Diaco Contracting Inc DBA Grade Construction",
+              x: 165,
+              y: 143,
+            },
+            {
+              text: "110 Pennsylvania Avenue, Paterson, NJ 07503",
+              x: 165,
+              y: 113,
+            },
+          ];
+
+          staticDetails.forEach((detail) => {
+            page.drawText(detail.text, {
+              x: detail.x,
+              y: detail.y,
+              font,
+              size: 9,
+            });
           });
-          page.drawText(formData.address1, {
-            x: 100,
-            y: 593,
-            font,
-            size: 11,
+
+          // Draw signature image
+          page.drawImage(signatureImage, {
+            x: imgX,
+            y: imgY,
+            width: imgWidth,
+            height: imgHeight,
           });
         }
 
-        // ✅ Only add each page once
         pdfDoc.addPage(page);
       });
     }
+
     if (formData.vendorQuoteYes && uploadedQuotePdf) {
       const quoteBytes = await uploadedQuotePdf.arrayBuffer();
       const quotePdf = await PDFDocument.load(quoteBytes);
@@ -629,6 +1133,16 @@ export default function Home() {
   };
 
   const [uploadedQuotePdf, setUploadedQuotePdf] = useState<File | null>(null);
+  function formatPhone(value: string = "") {
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+
+    const parts = [];
+    if (digits.length > 0) parts.push("(" + digits.slice(0, 3));
+    if (digits.length >= 4) parts.push(") " + digits.slice(3, 6));
+    if (digits.length >= 7) parts.push("-" + digits.slice(6));
+
+    return parts.join("");
+  }
 
   return (
     <>
@@ -683,6 +1197,8 @@ export default function Home() {
               type="date"
               placeholder="Date"
               onChange={handleChange}
+              min="1900-01-01"
+              max="2099-12-31"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
@@ -733,6 +1249,7 @@ export default function Home() {
             />
 
             <Modal
+
               isOpen={isAddVendorModalOpen}
               onClose={() => {
                 setIsAddVendorModalOpen(false);
@@ -806,14 +1323,12 @@ export default function Home() {
             <Input
               id="tel"
               name="tel"
-              placeholder="Tel"
-              type="number"
+              placeholder="(xxx)-xxx-xxxx"
+              type="tel"
+              value={formatPhone(formData.tel)}
               onChange={(e) => {
-                if (e.target.value.length >= 10) {
-                  e.target.value = e.target.value.slice(0, 10);
-                  return;
-                }
-                handleChange(e);
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                setFormData((prev) => ({ ...prev, tel: digits }));
               }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -907,14 +1422,8 @@ export default function Home() {
               name="driverContact"
               placeholder="Driver Contact"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              type="number"
-              onChange={(e) => {
-                if (e.target.value.length >= 10) {
-                  e.target.value = e.target.value.slice(0, 10);
-                  return;
-                }
-                handleChange(e);
-              }}
+              type="text"
+              onChange={handleChange}
             />
           </div>
 
@@ -928,15 +1437,13 @@ export default function Home() {
             <Input
               id="driverTel"
               name="driverTel"
-              placeholder="Driver Tel"
+              placeholder="(xxx) xxx-xxxx"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              type="number"
+              type="tel"
+              value={formatPhone(formData.driverTel)}
               onChange={(e) => {
-                if (e.target.value.length >= 10) {
-                  e.target.value = e.target.value.slice(0, 10);
-                  return;
-                }
-                handleChange(e);
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                setFormData((prev) => ({ ...prev, driverTel: digits }));
               }}
             />
           </div>
@@ -948,19 +1455,16 @@ export default function Home() {
             >
               Site Contact
             </label>
-            <Input
-              id="siteContact"
-              name="siteContact"
-              placeholder="Site Contact (Super)"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              type="number"
-              onChange={(e) => {
-                if (e.target.value.length >= 10) {
-                  e.target.value = e.target.value.slice(0, 10);
-                  return;
-                }
-                handleChange(e);
-              }}
+
+            <Select
+              options={teamMembers}
+              placeholder="Select or type Site Contact"
+              value={formData.siteContact}
+              onChange={(value) =>
+                handleChange({
+                  target: { name: "siteContact", value },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
             />
           </div>
 
@@ -974,15 +1478,13 @@ export default function Home() {
             <Input
               id="siteTel"
               name="siteTel"
-              placeholder="Site Tel"
+              placeholder="(xxx) xxx-xxxx"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              type="number"
+              type="tel"
+              value={formatPhone(formData.siteTel)}
               onChange={(e) => {
-                if (e.target.value.length >= 10) {
-                  e.target.value = e.target.value.slice(0, 10);
-                  return;
-                }
-                handleChange(e);
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                setFormData((prev) => ({ ...prev, siteTel: digits }));
               }}
             />
           </div>
@@ -1026,6 +1528,8 @@ export default function Home() {
                   name="date1"
                   placeholder="1) Date"
                   type="date"
+                  min="1900-01-01"
+                  max="2099-12-31"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
@@ -1059,6 +1563,8 @@ export default function Home() {
                   name="date3"
                   placeholder="3) Date"
                   type="date"
+                  min="1900-01-01"
+                  max="2099-12-31"
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
@@ -1092,6 +1598,8 @@ export default function Home() {
                   type="date"
                   placeholder="2) Date"
                   onChange={handleChange}
+                  min="1900-01-01"
+                  max="2099-12-31"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
@@ -1124,6 +1632,8 @@ export default function Home() {
                   placeholder="4) Date"
                   type="date"
                   onChange={handleChange}
+                  min="1900-01-01"
+                  max="2099-12-31"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
@@ -1156,30 +1666,27 @@ export default function Home() {
 
             <Select
               placeholder="Job # / Equip #"
-              options={jobDetails.map((job) => {
-                return {
-                  label: job.jobOrEquip,
-                  value: job.jobOrEquip,
-                };
-              })}
+              value={formData.jobNumber}
+              options={jobDetails.map((job) => ({
+                label: job.jobOrEquip,
+                value: job.jobOrEquip,
+              }))}
               onChange={(value) => {
                 const selectedJob = jobDetails.find(
-                  (job) => job.jobOrEquip === value
+                  (job) => job.jobOrEquip.toLowerCase() === value.toLowerCase()
                 );
-                if (selectedJob) {
-                  console.log(selectedJob);
 
-                  setFormData((prev) => ({
+                setFormData((prev) => {
+                  const newState = {
                     ...prev,
-                    jobNumber: selectedJob.jobOrEquip,
-                    jobName: selectedJob.jobName,
-                    // jobTask: selectedJob.jobTask,
-                    // officeContact: selectedJob.officeContact,
-                    // officeTel: selectedJob.tel,
-                  }));
-                }
+                    jobNumber: value, // Update jobNumber with the selected or typed value
+                    jobName: selectedJob ? selectedJob.jobName : prev.jobName, // Auto-fill jobName if found, otherwise keep it as-is
+                  };
+
+                  return newState;
+                });
               }}
-            ></Select>
+            />
           </div>
 
           <div className="flex flex-col space-y-1.5">
@@ -1189,11 +1696,25 @@ export default function Home() {
             >
               Job Name / Equip Name
             </label>
-            <Input
-              name="jobName"
+            <Select
+              placeholder="Job Name / Equip Name"
               value={formData.jobName}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              options={jobDetails.map((job) => ({
+                label: job.jobName,
+                value: job.jobName,
+              }))}
+              onChange={(value) => {
+                const selectedJob = jobDetails.find(
+                  (job) => job.jobName === value
+                );
+                setFormData((prev) => ({
+                  ...prev,
+                  jobName: value,
+                  jobNumber: selectedJob
+                    ? selectedJob.jobOrEquip
+                    : prev.jobNumber,
+                }));
+              }}
             />
           </div>
 
@@ -1229,20 +1750,16 @@ export default function Home() {
             >
               Office Contact
             </label>
-            <Input
-              id="officeContact"
-              name="officeContact"
-              placeholder="Office Contact"
+
+            <Select
+              options={teamMembers}
+              placeholder="Select or type Office Contact"
               value={formData.officeContact}
-              type="number"
-              onChange={(e) => {
-                if (e.target.value.length >= 10) {
-                  e.target.value = e.target.value.slice(0, 10);
-                  return;
-                }
-                handleChange(e);
-              }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              onChange={(value) =>
+                handleChange({
+                  target: { name: "officeContact", value },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
             />
           </div>
 
@@ -1258,37 +1775,46 @@ export default function Home() {
               name="officeTel"
               placeholder="Tel"
               value={formData.officeTel}
-              type="number"
-              onChange={(e) => {
-                if (e.target.value.length >= 10) {
-                  e.target.value = e.target.value.slice(0, 10);
-                  return;
-                }
-                handleChange(e);
-              }}
+              disabled
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <LimitedInput
-              name="requestedBy"
-              label="Requested By"
-              placeholder="Requested By"
+            <label
+              htmlFor="Requested By"
+              className="text-sm font-medium text-gray-700"
+            >
+              Requested By
+            </label>
+            <Select
+              options={teamMembers}
+              placeholder="Select or type Requested By"
               value={formData.requestedBy}
-              max={fieldConfigs.requestedBy}
-              onChange={handleChange}
+              onChange={(value) =>
+                handleChange({
+                  target: { name: "requestedBy", value },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <LimitedInput
-              name="orderedBy"
-              label="Ordered By"
-              placeholder="Ordered By"
+            <label
+              htmlFor="Ordered By"
+              className="text-sm font-medium text-gray-700"
+            >
+              Ordered By
+            </label>
+            <Select
+              options={teamMembers}
+              placeholder="Select or type Ordered By"
               value={formData.orderedBy}
-              max={fieldConfigs.orderedBy}
-              onChange={handleChange}
+              onChange={(value) =>
+                handleChange({
+                  target: { name: "orderedBy", value },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
             />
           </div>
 
@@ -1304,6 +1830,8 @@ export default function Home() {
               name="rightDate"
               placeholder="Date"
               type="date"
+              min="1900-01-01"
+              max="2099-12-31"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -1365,26 +1893,36 @@ export default function Home() {
                 type="checkbox"
                 name="amex"
                 onChange={handleChange}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                className="w-4 h-4 text-blue-600 mr-2 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
               />{" "}
               AMEX
             </label>
             <div className="flex flex-col space-y-1.5">
-              <LimitedInput
+              {/* <LimitedInput
                 name="amexText"
                 label="AMEX Details"
                 placeholder="AMEX Details"
                 value={formData.amexText}
                 max={fieldConfigs.amexText}
                 onChange={handleChange}
-              />
+              /> */}
+               <Select
+              options={teamMembers}
+              placeholder="Select/Type AMEX Details"
+              value={formData.amexText}
+              onChange={(value) =>
+                handleChange({
+                  target: { name: "amexText", value },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
+            />
             </div>
             <label className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
               <input
                 type="checkbox"
                 name="cod"
                 onChange={handleChange}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
               />
               COD
             </label>
@@ -1539,17 +2077,25 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <LimitedInput
-              name="author"
-              label="Author"
-              placeholder="Author"
+            <label
+              htmlFor="author"
+              className="text-sm font-medium text-gray-700"
+            >
+              Author
+            </label>
+            <Select
+              options={teamMembers}
+              placeholder="Select or type author"
               value={formData.author}
-              max={fieldConfigs.author}
-              onChange={handleChange}
+              onChange={(value) =>
+                handleChange({
+                  target: { name: "author", value },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
             />
           </div>
 
-          <div className="flex flex-col space-y-1.5">
+          {/* <div className="flex flex-col space-y-1.5">
             <LimitedInput
               name="authorSignature"
               label="Author Signature"
@@ -1558,20 +2104,28 @@ export default function Home() {
               max={fieldConfigs.authorSignature}
               onChange={handleChange}
             />
-          </div>
+          </div> */}
 
           <div className="flex flex-col space-y-1.5">
-            <LimitedInput
-              name="pmName"
-              label="PM Name"
-              placeholder="PM Name"
+            <label
+              htmlFor="PM Name"
+              className="text-sm font-medium text-gray-700"
+            >
+              PM Name
+            </label>
+            <Select
+              options={teamMembers}
+              placeholder="Select or type PM Name"
               value={formData.pmName}
-              max={fieldConfigs.pmName}
-              onChange={handleChange}
+              onChange={(value) =>
+                handleChange({
+                  target: { name: "pmName", value },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
             />
           </div>
 
-          <div className="flex flex-col space-y-1.5">
+          {/* <div className="flex flex-col space-y-1.5">
             <LimitedInput
               name="pmSignature"
               label="PM Signature"
@@ -1580,7 +2134,7 @@ export default function Home() {
               max={fieldConfigs.pmSignature}
               onChange={handleChange}
             />
-          </div>
+          </div> */}
 
           <div className="flex flex-col space-y-1.5">
             <LimitedInput
@@ -1605,6 +2159,8 @@ export default function Home() {
               name="approvedDate"
               placeholder="Approved Date"
               type="date"
+              min="1900-01-01"
+              max="2099-12-31"
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
@@ -1795,6 +2351,43 @@ export default function Home() {
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                       />
                     </div>
+                    <div className="col-span-full flex justify-end space-x-2 mt-2">
+                      {/* Clear button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedItems = [...formData.lineItems];
+                          updatedItems[index] = {
+                            description: "",
+                            quantity: "",
+                            um: "",
+                            unitCost: "",
+                            total: "",
+                            jobEquipNotes: "",
+                            costCode: "",
+                            payItem: "",
+                          };
+                          setFormData({ ...formData, lineItems: updatedItems });
+                        }}
+                        className="px-3 py-1.5 text-sm bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200 rounded-md hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors"
+                      >
+                        Clear
+                      </button>
+
+                      {/* Delete button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedItems = formData.lineItems.filter(
+                            (_, i) => i !== index
+                          );
+                          setFormData({ ...formData, lineItems: updatedItems });
+                        }}
+                        className="px-3 py-1.5 text-sm bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1822,7 +2415,7 @@ export default function Home() {
               }
               className="mt-4 px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors flex items-center justify-center"
             >
-              <span className="mr-1">+</span> Add another item
+              <span className="mr-1">+</span> Add item
             </button>
           </div>
 
@@ -1840,7 +2433,11 @@ export default function Home() {
               name="subtotal"
               placeholder="Subtotal"
               type="number"
-              value={formData.subtotal}
+              value={
+                parseFloat(formData.subtotal || "0") > 0
+                  ? formData.subtotal
+                  : ""
+              }
               disabled
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -1911,7 +2508,11 @@ export default function Home() {
             <Input
               id="grandTotal"
               name="grandTotal"
-              value={formData.grandTotal}
+              value={
+                parseFloat(formData.grandTotal || "0") > 0
+                  ? formData.grandTotal
+                  : ""
+              }
               placeholder="Grand Total"
               disabled
               onChange={handleChange}
@@ -1948,6 +2549,8 @@ export default function Home() {
               placeholder="Date"
               type="date"
               onChange={handleChange}
+              min="1900-01-01"
+              max="2099-12-31"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
