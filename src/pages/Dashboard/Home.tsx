@@ -223,6 +223,7 @@ export default function Home() {
     { jobOrEquip: "24-380", jobName: "Concrete South" },
     { jobOrEquip: "24-417", jobName: "Glenside" },
     { jobOrEquip: "25-154", jobName: "Rt. 15" },
+    { jobOrEquip: "25-119", jobName: "Johnson Hackensack" },
   ];
 
   // const taxExemptFiles: { [jobOrEquip: string]: string } = {
@@ -253,37 +254,59 @@ export default function Home() {
   //   // Optional fallback
   //   default: "",
   // };
+  type TeamMemberOption = {
+    value: string;
+    label: string;
+    phone: string;
+  };
 
-  const teamMembers = [
-    // Office Staff
-    { value: "Aditya N", label: "Aditya (Adi) Nakrani" },
-    { value: "Christopher S", label: "Christopher Squirlock" },
-    { value: "Maria S", label: "Maria Squirlock" },
-    { value: "Mohit R", label: "Mohit Ruhil" },
-    { value: "Nimanshu B", label: "Nimanshu Bhanderi" },
-    { value: "Ralph D", label: "Ralph Diaco" },
-    { value: "Michael L", label: "Michael Loia" },
-    { value: "Rissa P", label: "Rissa Privitera" },
-    { value: "Robert J", label: "Robert (Bob) Janecek" },
-
-    // Field Staff
-    { value: "Pablo S", label: "Pablo Sousa" },
-    { value: "Henil S", label: "Henil Shah" },
-    { value: "Dev M", label: "Dev Moradia" },
-    { value: "Deep S", label: "Deep Shah" },
-    { value: "Goncalo D", label: "Goncalo (G) Duarte" },
-    { value: "Adenilson F", label: "Adenilson (Nilson) Fernandes" },
-    { value: "Anderson F", label: "Anderson Fonseca" },
-    { value: "Edilson D", label: "Edilson (Eddie) DaSilva" },
-    { value: "Joao C", label: "Joao (John) Corticeiro" },
-    { value: "Patrick A", label: "Patrick Araujo" },
-    { value: "Luigi C", label: "Luigi Catalanotto" },
-    { value: "Manuel C", label: "Manuel (Anthony) Castro" },
-    { value: "Humberto D", label: "Humberto DeCarvalho" },
-    { value: "Jamie P", label: "Jamie Phemsint" },
-    { value: "John L", label: "John LaRiccia" },
-    { value: "Mario C", label: "Mario Costa" },
-    { value: "Victor P", label: "Victor Pinho" },
+  const teamMembers: TeamMemberOption[] = [
+    { value: "Aditya N", label: "Aditya (Adi) Nakrani", phone: "201-566-1941" },
+    {
+      value: "Christopher S",
+      label: "Christopher Squirlock",
+      phone: "973-567-8462",
+    },
+    { value: "Maria S", label: "Maria Squirlock", phone: "201-396-4379" },
+    { value: "Mohit R", label: "Mohit Ruhil", phone: "201-421-5426" },
+    { value: "Nimanshu B", label: "Nimanshu Bhanderi", phone: "551-263-5975" },
+    { value: "Ralph D", label: "Ralph Diaco", phone: "973-766-4942" },
+    { value: "Michael L", label: "Michael Loia", phone: "973-907-3365" },
+    { value: "Rissa P", label: "Rissa Privitera", phone: "516-459-7860" },
+    { value: "Robert J", label: "Robert (Bob) Janecek", phone: "551-427-2639" },
+    { value: "Pablo S", label: "Pablo Sousa", phone: "973-951-9323" },
+    { value: "Henil S", label: "Henil Shah", phone: "551-286-8867" },
+    { value: "Dev M", label: "Dev Moradia", phone: "973-600-0240" },
+    { value: "Deep S", label: "Deep Shah", phone: "973-634-3120" },
+    { value: "Goncalo D", label: "Goncalo (G) Duarte", phone: "201-638-9888" },
+    {
+      value: "Adenilson F",
+      label: "Adenilson (Nilson) Fernandes",
+      phone: "973-907-4441",
+    },
+    { value: "Anderson F", label: "Anderson Fonseca", phone: "973-494-1977" },
+    {
+      value: "Edilson D",
+      label: "Edilson (Eddie) DaSilva",
+      phone: "973-524-0838",
+    },
+    { value: "Joao C", label: "Joao (John) Corticeiro", phone: "973-303-6537" },
+    { value: "Patrick A", label: "Patrick Araujo", phone: "973-900-0717" },
+    { value: "Luigi C", label: "Luigi Catalanotto", phone: "973-951-6354" },
+    {
+      value: "Manuel C",
+      label: "Manuel (Anthony) Castro",
+      phone: "484-588-1741",
+    },
+    {
+      value: "Humberto D",
+      label: "Humberto DeCarvalho",
+      phone: "732-912-9066",
+    },
+    { value: "Jamie P", label: "Jamie Phemsint", phone: "201-681-2712" },
+    { value: "John L", label: "John LaRiccia", phone: "201-888-4033" },
+    { value: "Mario C", label: "Mario Costa", phone: "732-766-4838" },
+    { value: "Victor P", label: "Victor Pinho", phone: "908-838-6505" },
   ];
 
   const handleChange = (
@@ -354,8 +377,8 @@ export default function Home() {
   ]);
 
   const generatePdf = async () => {
-    const existingPdfBytes = await fetch("/assets/company-template.pdf").then((res) =>
-      res.arrayBuffer()
+    const existingPdfBytes = await fetch("/assets/company-template.pdf").then(
+      (res) => res.arrayBuffer()
     );
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -678,9 +701,21 @@ export default function Home() {
     draw(formData.approvedBy, 365, 490);
     draw(formatDate(formData.approvedDate), 525, 490);
     draw(formData.rightBottomNotes, 335, 476);
-    
 
-    
+    const formatUSD = (value: string | number): string => {
+      const number = parseFloat(value as string);
+      if (isNaN(number) || number <= 0) return "";
+
+      const isWhole = number % 1 === 0;
+
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: isWhole ? 0 : 2,
+        maximumFractionDigits: 2,
+      }).format(number);
+    };
+
     const drawShrinkToFit = (
       text: string,
       x: number,
@@ -690,80 +725,93 @@ export default function Home() {
       minFontSize: number = 4
     ) => {
       if (!text) return;
-    
+
       let fontSize = baseFontSize;
-      let width =font.widthOfTextAtSize(text, fontSize);
-    
+      let width = font.widthOfTextAtSize(text, fontSize);
+
       while (width > maxWidth && fontSize > minFontSize) {
         fontSize -= 0.5;
         width = font.widthOfTextAtSize(text, fontSize);
       }
-    
+
       page.drawText(text, {
         x,
         y,
         size: fontSize,
         font: font,
       });
-
-      
     };
-    
+
     const startY = 429;
     let currentY = startY;
-// drawWrappedText should return at least 1, even if text fits in one line
-const drawWrappedtext = (
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number,
-  fontSize: number = 10
-): number => {
-  if (!text) return 1;
+    // drawWrappedText should return at least 1, even if text fits in one line
+    const drawWrappedtext = (
+      text: string,
+      x: number,
+      y: number,
+      maxWidth: number,
+      lineHeight: number,
+      fontSize: number = 10
+    ): number => {
+      if (!text) return 1;
 
-  const words = text.split(/\s+/);
-  let line = '';
-  let linesUsed = 0;
+      const words = text.split(/\s+/);
+      let line = "";
+      let linesUsed = 0;
 
-  for (let i = 0; i < words.length; i++) {
-    const testLine = line ? `${line} ${words[i]}` : words[i];
-    const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line ? `${line} ${words[i]}` : words[i];
+        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
 
-    if (testWidth <= maxWidth) {
-      line = testLine;
-    } else {
-      page.drawText(line, { x, y: y - linesUsed * lineHeight, size: fontSize, font: font });
-      linesUsed++;
-      line = words[i];
-    }
-  }
+        if (testWidth <= maxWidth) {
+          line = testLine;
+        } else {
+          page.drawText(line, {
+            x,
+            y: y - linesUsed * lineHeight,
+            size: fontSize,
+            font: font,
+          });
+          linesUsed++;
+          line = words[i];
+        }
+      }
 
-  // Draw the last line
-  if (line) {
-    page.drawText(line, { x, y: y - linesUsed * lineHeight, size: fontSize, font: font });
-    linesUsed++;
-  }
+      // Draw the last line
+      if (line) {
+        page.drawText(line, {
+          x,
+          y: y - linesUsed * lineHeight,
+          size: fontSize,
+          font: font,
+        });
+        linesUsed++;
+      }
 
-  return linesUsed; // Don't add +1 outside
-};
+      return linesUsed; // Don't add +1 outside
+    };
 
     formData.lineItems.forEach((item) => {
-      const linesUsed = drawWrappedtext(item.description, 35, currentY, 180, rowHeight); // Description can still wrap
-    
+      const linesUsed = drawWrappedtext(
+        item.description,
+        35,
+        currentY,
+        180,
+        rowHeight
+      ); // Description can still wrap
+
       drawShrinkToFit(item.quantity, 245, currentY, 20);
       drawShrinkToFit(item.um, 275, currentY, 20);
-      drawShrinkToFit(parseFloat(item.unitCost) > 0 ? `$${item.unitCost}` : '', 294, currentY, 35);
-      drawShrinkToFit(parseFloat(item.total) > 0 ? `$${item.total}` : '', 334, currentY, 35);
+      drawShrinkToFit(formatUSD(item.unitCost), 294, currentY, 35);
+      drawShrinkToFit(formatUSD(item.total), 334, currentY, 35);
+
       drawShrinkToFit(item.jobEquipNotes, 390, currentY, 100);
       drawShrinkToFit(item.costCode, 510, currentY, 40);
       drawShrinkToFit(item.payItem, 560, currentY, 40);
-    
+
       // Only description wraps, so use its height
       currentY -= linesUsed * rowHeight;
-
     });
-    
 
     // formData.lineItems.forEach((item, idx) => {
     //   const y = startY - idx * rowHeight;
@@ -777,31 +825,21 @@ const drawWrappedtext = (
     //   draw(item.payItem, 560, y);
     // });
 
-    draw(
-      parseFloat(formData.subtotal) > 0 ? `$${formData.subtotal}` : "",
-      335,
-      123
-    ); //dollar in string
-    draw(
-      parseFloat(formData.delivery) > 0 ? `$${formData.delivery}` : "",
-      335,
-      108
-    ); //dollar in string
-    draw(
-      parseFloat(formData.salesTax) > 0 ? `$${formData.salesTax}` : "",
-      335,
-      93
-    ); //dollar in string
-    draw(
-      parseFloat(formData.bottomOther) > 0 ? `$${formData.bottomOther}` : "",
-      335,
-      78
-    ); //dollar in string
-    draw(
-      parseFloat(formData.grandTotal) > 0 ? `$${formData.grandTotal}` : "",
-      335,
-      63
-    ); //dollar in string
+    const formattedSubtotal = formatUSD(formData.subtotal);
+    if (formattedSubtotal) drawShrinkToFit(formattedSubtotal, 332, 123, 40);
+
+    const formattedDelivery = formatUSD(formData.delivery);
+    if (formattedDelivery) drawShrinkToFit(formattedDelivery, 332, 108, 40);
+
+    const formattedSalesTax = formatUSD(formData.salesTax);
+    if (formattedSalesTax) drawShrinkToFit(formattedSalesTax, 332, 93, 40);
+
+    const formattedBottomOther = formatUSD(formData.bottomOther);
+    if (formattedBottomOther)
+      drawShrinkToFit(formattedBottomOther, 332, 78, 40);
+
+    const formattedGrandTotal = formatUSD(formData.grandTotal);
+    if (formattedGrandTotal) drawShrinkToFit(formattedGrandTotal, 332, 63, 40);
 
     draw(formData.sign, 33, 28);
     draw(formatDate(formData.signDate), 270, 28);
@@ -816,6 +854,7 @@ const drawWrappedtext = (
           | "Exempt Organization"
           | "Qualified Housing Sponsor";
         exemptNumber?: string;
+        formVersion: "R-13" | "R-8"; // Add to each job entry
       };
     } = {
       "20-1209": {
@@ -824,12 +863,14 @@ const drawWrappedtext = (
         address2:
           "Construction of Burn Building and Site Work for the Hunterdon County Emergency Services Training Center",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "20-1242": {
         governmentEntity: "City of Bayonne, Borough Hall",
         address1: "25 W. 38th Street, Bayonne, NJ 07002",
         address2: "316 Avenue E (adjacent to jobsite), Bayonne, NJ 07002",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "21-1545": {
         governmentEntity:
@@ -838,6 +879,7 @@ const drawWrappedtext = (
         address2:
           "Replacement Of Bridge HL-45 & HL 46, 137 Allaire Road, Howell, NJ 07727",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "22-152": {
         governmentEntity: "Passaic Valley Water Commission",
@@ -845,6 +887,7 @@ const drawWrappedtext = (
         address2:
           "Water Transmission Main Improvements Industrial Loop, (3 locations - no street addresses), Paterson, NJ",
         category: "Governmental Entity",
+        formVersion: "R-8",
       },
       "22-173": {
         governmentEntity: "Township of Little Falls",
@@ -852,6 +895,7 @@ const drawWrappedtext = (
         address2:
           "Downtown Streetscape Improvements Section 4 - 44 Main Street, Little Falls, NJ 07424",
         category: "Governmental Entity",
+        formVersion: "R-8",
       },
       "22-197": {
         governmentEntity: "County of Middlesex",
@@ -859,6 +903,7 @@ const drawWrappedtext = (
         address2:
           "22-197 Replace Culvert 3-C-73 Jernee Mill Road, 575 Jernee Mill Rd, Sayreville NJ 08872",
         category: "Governmental Entity",
+        formVersion: "R-8",
       },
       "22-231": {
         governmentEntity: "The Department of Military & Veterans Affairs",
@@ -867,13 +912,16 @@ const drawWrappedtext = (
         exemptNumber: "216000928",
         address2:
           "Gravesite Expansion & Site Improvements at William Doyle Cemetery - 350 Province Line Rd, Wrightstown, NJ 08562",
+        formVersion: "R-8",
       },
+
       "22-252": {
         governmentEntity: "Township of Little Falls",
         address1: "225 Main Street, Little Falls, NJ 07424",
         address2:
-          "SECTION 3 Downtown Streetscape Improvements - 44 Main Street, Little Falls, NU 07424",
+          "SECTION 3 Downtown Streetscape Improvements - 44 Main Street, Little Falls, NJ 07424",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "22-304": {
         governmentEntity: "County of Middlesex",
@@ -881,6 +929,7 @@ const drawWrappedtext = (
         address2:
           "Replacement of Culvert 1-C-87 Thornall St Over Tributary of Rahway River - 561 Thornall Street, Edison, New Jersey 08837",
         category: "Governmental Entity",
+        formVersion: "R-8",
       },
       "22-312": {
         governmentEntity: "County of Ocean",
@@ -888,6 +937,7 @@ const drawWrappedtext = (
         address2:
           "Replacement of Colonial Drive Bridges - 21 Colonial Drive, Manchester, New Jersey 08759",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "23-286": {
         governmentEntity: "County of Sussex",
@@ -895,12 +945,14 @@ const drawWrappedtext = (
         address2:
           "Replacement of Sussex County Bridge X-48, 1198 NJ-23, Wantage, NJ 07461",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "23-292": {
         governmentEntity: "Mercer County",
         address1: "640 South Broad Street, Trenton, NJ 08650",
         address2: "1738 Princeton Ave, Lawrence Township, NJ 08650",
         category: "Governmental Entity",
+        formVersion: "R-8",
       },
       "24-115": {
         governmentEntity: "North Hudson Sewerage Authority",
@@ -908,6 +960,7 @@ const drawWrappedtext = (
         category: "Governmental Entity",
         address2:
           "Madison Street area Infrastructure Improvements Phase 2 - 824 Madison Street, Hoboken, NJ 07030",
+        formVersion: "R-13",
       },
       "24-242": {
         governmentEntity: "County of Middlesex",
@@ -915,6 +968,7 @@ const drawWrappedtext = (
         address2:
           "Improvements to the Intersection of Main St (RT 670) and Crossman Rd - 14 Crossman Road, Sayreville, NJ 08872",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "24-302": {
         governmentEntity: "Byram Township",
@@ -922,6 +976,7 @@ const drawWrappedtext = (
         address2:
           "Johnson Park Field 8 Reconstruction - 117 Roseville Rd, Byram Township, New Jersey 07821",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "24-311": {
         governmentEntity: "Borough of New Providence",
@@ -929,6 +984,7 @@ const drawWrappedtext = (
         address2:
           "Bridge at New Providence Community Pool Replacement - 1378 Springfield Ave, New Providence, NJ 07974",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "24-316": {
         governmentEntity: "Union County Improvement Authority",
@@ -936,6 +992,7 @@ const drawWrappedtext = (
         address2:
           "Green Lane Park Improvements - 520 Green Lane, Union, New Jersey 07083",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "24-363": {
         governmentEntity: "County of Ocean",
@@ -943,6 +1000,7 @@ const drawWrappedtext = (
         address2:
           "Barnegat Branch Trail Phase IX Construction - 225 Atlantic City Blvd, Toms River, NJ 08757",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "24-367": {
         governmentEntity: "County of Union",
@@ -950,6 +1008,7 @@ const drawWrappedtext = (
         address2:
           "Replacement of Lower Minor Road Bridge (Li-63) - 1301 Lower Road, Linden, NJ 07036",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "24-371": {
         governmentEntity: "County of Passaic",
@@ -957,6 +1016,7 @@ const drawWrappedtext = (
         address2:
           "Replacement of Doty Road Bridge - 140 Doty Road, Haskell, NJ 07420",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "24-380": {
         governmentEntity: "NJ Department of Transportation",
@@ -964,6 +1024,7 @@ const drawWrappedtext = (
         address2:
           "Maintenance Concrete Structural Repair - South, 2025, South Region, NJ",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "24-417": {
         governmentEntity: "Union County Improvement Authority",
@@ -971,6 +1032,7 @@ const drawWrappedtext = (
         address2:
           "Glenside Avenue Park Improvements - 175 Glenside Avenue, Scotch Plains, NU 07076",
         category: "Governmental Entity",
+        formVersion: "R-13",
       },
       "25-119": {
         governmentEntity: "City of Hackensack",
@@ -978,6 +1040,7 @@ const drawWrappedtext = (
         address2:
           "Johnson Park Sports Complex Site/Utility Improvements - 452 River St, Hackensack, NJ 07601",
         category: "Governmental Entity",
+        formVersion: "R-8",
       },
       "25-154": {
         governmentEntity: "NJ Department of Transportation",
@@ -985,12 +1048,127 @@ const drawWrappedtext = (
         address2:
           "Route 15 Bridge Replacement Over Paulins Kill - 115 Lafayette Road, Lafayette, NJ 07848",
         category: "Governmental Entity",
+        formVersion: "R-13",
+      },
+    };
+    type Category =
+      | "Governmental Entity"
+      | "Exempt Organization"
+      | "Qualified Housing Sponsor";
+    type FormVersion = "R-13" | "R-8";
+
+    type Coordinate = { x: number; y: number };
+
+    const formCoordinatesMap: Record<
+      FormVersion,
+      {
+        vendor: Coordinate;
+        date: Coordinate;
+        address1: Coordinate;
+        common: {
+          address2: Coordinate;
+        };
+        governmentalEntity: {
+          governmentEntity: Coordinate;
+          address1: Coordinate;
+        };
+        exemptOrganization: {
+          governmentEntity: Coordinate;
+          address1: Coordinate;
+          exemptNumber: Coordinate;
+        };
+        qualifiedHousingSponsor: {
+          governmentEntity: Coordinate;
+          address1: Coordinate;
+        };
+        cross: Record<Category, Coordinate>;
+        staticDetails: Coordinate[];
+        signature: { x: number; y: number; width: number; height: number };
+      }
+    > = {
+      "R-13": {
+        vendor: { x: 100, y: 633 },
+        date: { x: 445, y: 633 },
+        address1: { x: 100, y: 603 },
+        common: {
+          address2: { x: 75, y: 190 },
+        },
+        governmentalEntity: {
+          governmentEntity: { x: 270, y: 343 },
+          address1: { x: 270, y: 320 },
+        },
+        exemptOrganization: {
+          governmentEntity: { x: 270, y: 440 },
+          address1: { x: 270, y: 419 },
+          exemptNumber: { x: 270, y: 395 },
+        },
+        qualifiedHousingSponsor: {
+          address1: { x: 270, y: 268 },
+          governmentEntity: { x: 270, y: 246 },
+        },
+        cross: {
+          "Governmental Entity": { x: 76, y: 362 },
+          "Exempt Organization": { x: 77, y: 460 },
+          "Qualified Housing Sponsor": { x: 76, y: 286 },
+        },
+        staticDetails: [
+          { x: 425, y: 700 },
+          { x: 165, y: 143 },
+          { x: 165, y: 113 },
+        ],
+        signature: {
+          x: 160,
+          y: 87,
+          width: 100,
+          height: 12,
+        },
+      },
+      "R-8": {
+        vendor: { x: 95, y: 620 },
+        date: { x: 440, y: 620 },
+        address1: { x: 95, y: 590 },
+        common: {
+          address2: { x: 66, y: 210 },
+        },
+        governmentalEntity: {
+          governmentEntity: { x: 255, y: 360 },
+          address1: { x: 255, y: 338 },
+        },
+        exemptOrganization: {
+          governmentEntity: { x: 255, y: 458 },
+          address1: { x: 255, y: 436 },
+          exemptNumber: { x: 255, y: 414 },
+        },
+        qualifiedHousingSponsor: {
+          address1: { x: 255, y: 285 },
+          governmentEntity: { x: 255, y: 263 },
+        },
+        cross: {
+          "Governmental Entity": { x: 66, y: 380 },
+          "Exempt Organization": { x: 68, y: 476 },
+          "Qualified Housing Sponsor": { x: 67, y: 303 },
+        },
+        staticDetails: [
+          { x: 400, y: 680 },
+          { x: 153, y: 150 },
+          { x: 153, y: 120 },
+        ],
+        signature: {
+          x: 155,
+          y: 90,
+          width: 100,
+          height: 12,
+        },
       },
     };
 
     if (formData.taxExemptYes) {
-      // Use the common tax-exempt form for all jobs
-      const taxExemptPdfPath = "/assets/tax-exempt/tax-exempt.pdf";
+      // Determine the correct PDF form and coordinates
+      const extraData = taxExemptDataByJob[formData.jobNumber];
+      const formVersion = extraData?.formVersion || "R-13";
+      const coords = formCoordinatesMap[formVersion];
+
+      const taxExemptPdfPath = `/assets/tax-exempt/tax-exempt-${formVersion}.pdf`;
 
       const extraPdfBytes = await fetch(taxExemptPdfPath).then((res) =>
         res.arrayBuffer()
@@ -1001,43 +1179,29 @@ const drawWrappedtext = (
         extraPdf.getPageIndices()
       );
 
-      // Load the signature image
       const signatureBytes = await fetch(
         "/assets/tax-exempt/CS Signature for Tax Cert.jpg"
       ).then((res) => res.arrayBuffer());
       const signatureImage = await pdfDoc.embedJpg(signatureBytes);
 
-      // Embed font
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-      // Signature image coordinates
-      const imgWidth = 100;
-      const imgHeight = 12;
-      const imgX = 160;
-      const imgY = 87;
-
-      // Get extra tax-exempt data based on job number
-      const extraData = taxExemptDataByJob[formData.jobNumber];
-
-      const crossPositions: Record<string, { x: number; y: number }> = {
-        "Governmental Entity": { x: 76, y: 362 },
-        "Exempt Organization": { x: 77, y: 460 },
-        "Qualified Housing Sponsor": { x: 76, y: 286 },
-      };
 
       copiedPages.forEach((page, index) => {
         if (index === 0) {
-          // Draw common fields
-          page.drawText(formData.vendor, { x: 100, y: 633, font, size: 9 });
+          // Vendor and top section
+          page.drawText(formData.vendor, { ...coords.vendor, font, size: 9 });
           page.drawText(formatDate(formData.date), {
-            x: 445,
-            y: 633,
+            ...coords.date,
             font,
             size: 9,
           });
-          page.drawText(formData.address1, { x: 100, y: 603, font, size: 9 });
+          page.drawText(formData.address1, {
+            ...coords.address1,
+            font,
+            size: 9,
+          });
 
-          // Draw extra job-based tax-exempt info
+          // Tax-exempt data
           if (extraData) {
             const {
               category,
@@ -1047,24 +1211,26 @@ const drawWrappedtext = (
               exemptNumber,
             } = extraData;
 
-            // Address 2 always appears
-            page.drawText(address2, { x: 75, y: 190, font, size: 9 });
+            page.drawText(address2, {
+              ...coords.common.address2,
+              font,
+              size: 9,
+            });
 
             if (category === "Exempt Organization") {
-              // Top section specific to exempt org
               page.drawText(governmentEntity, {
-                x: 270,
-                y: 440,
+                ...coords.exemptOrganization.governmentEntity,
                 font,
                 size: 9,
               });
-              page.drawText(address1, { x: 270, y: 419, font, size: 9 });
-
-              // Optional exempt number
+              page.drawText(address1, {
+                ...coords.exemptOrganization.address1,
+                font,
+                size: 9,
+              });
               if (exemptNumber) {
                 page.drawText(exemptNumber, {
-                  x: 270,
-                  y: 395,
+                  ...coords.exemptOrganization.exemptNumber,
                   font,
                   size: 9,
                 });
@@ -1072,68 +1238,58 @@ const drawWrappedtext = (
             }
 
             if (category === "Qualified Housing Sponsor") {
-              // Lower section for housing sponsors
-              page.drawText(address1, { x: 270, y: 268, font, size: 9 });
+              page.drawText(address1, {
+                ...coords.qualifiedHousingSponsor.address1,
+                font,
+                size: 9,
+              });
               page.drawText(governmentEntity, {
-                x: 270,
-                y: 246,
+                ...coords.qualifiedHousingSponsor.governmentEntity,
                 font,
                 size: 9,
               });
             }
 
             if (category === "Governmental Entity") {
-              // Only middle section for government entities
               page.drawText(governmentEntity, {
-                x: 270,
-                y: 343,
+                ...coords.governmentalEntity.governmentEntity,
                 font,
                 size: 9,
               });
-              page.drawText(address1, { x: 270, y: 320, font, size: 9 });
-            }
-
-            // Draw the "X" in the right checkbox
-            const crossCoord = crossPositions[category];
-            if (crossCoord) {
-              page.drawText("x", {
-                x: crossCoord.x,
-                y: crossCoord.y,
+              page.drawText(address1, {
+                ...coords.governmentalEntity.address1,
                 font,
-                size: 12,
+                size: 9,
               });
             }
+
+            // Draw checkbox X
+            const crossCoord = coords.cross[category];
+            page.drawText("x", {
+              ...crossCoord,
+              font,
+              size: 12,
+            });
           }
 
-          const staticDetails = [
-            { text: "03-0502857/000", x: 425, y: 700 },
-            {
-              text: "Diaco Contracting Inc DBA Grade Construction",
-              x: 165,
-              y: 143,
-            },
-            {
-              text: "110 Pennsylvania Avenue, Paterson, NJ 07503",
-              x: 165,
-              y: 113,
-            },
+          // Static company details
+          const staticTexts = [
+            "03-0502857/000",
+            "Diaco Contracting Inc DBA Grade Construction",
+            "110 Pennsylvania Avenue, Paterson, NJ 07503",
           ];
 
-          staticDetails.forEach((detail) => {
-            page.drawText(detail.text, {
-              x: detail.x,
-              y: detail.y,
+          staticTexts.forEach((text, i) => {
+            page.drawText(text, {
+              ...coords.staticDetails[i],
               font,
               size: 9,
             });
           });
 
-          // Draw signature image
+          // Signature image
           page.drawImage(signatureImage, {
-            x: imgX,
-            y: imgY,
-            width: imgWidth,
-            height: imgHeight,
+            ...coords.signature,
           });
         }
 
@@ -1498,11 +1654,14 @@ const drawWrappedtext = (
               options={teamMembers}
               placeholder="Select or type Site Contact"
               value={formData.siteContact}
-              onChange={(value) =>
-                handleChange({
-                  target: { name: "siteContact", value },
-                } as React.ChangeEvent<HTMLInputElement>)
-              }
+              onChange={(value: string) => {
+                const selected = teamMembers.find((m) => m.value === value);
+                setFormData((prev) => ({
+                  ...prev,
+                  siteContact: value,
+                  siteTel: selected?.phone || "",
+                }));
+              }}
             />
           </div>
 
@@ -1519,7 +1678,7 @@ const drawWrappedtext = (
               placeholder="(xxx) xxx-xxxx"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               type="tel"
-              value={formatPhone(formData.siteTel)}
+              value={formatPhone(formData.siteTel)} // Optional: use `formatPhone` to format the phone number
               onChange={(e) => {
                 const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
                 setFormData((prev) => ({ ...prev, siteTel: digits }));
@@ -1944,16 +2103,16 @@ const drawWrappedtext = (
                 max={fieldConfigs.amexText}
                 onChange={handleChange}
               /> */}
-               <Select
-              options={teamMembers}
-              placeholder="Select/Type AMEX Details"
-              value={formData.amexText}
-              onChange={(value) =>
-                handleChange({
-                  target: { name: "amexText", value },
-                } as React.ChangeEvent<HTMLInputElement>)
-              }
-            />
+              <Select
+                options={teamMembers}
+                placeholder="Select/Type AMEX Details"
+                value={formData.amexText}
+                onChange={(value) =>
+                  handleChange({
+                    target: { name: "amexText", value },
+                  } as React.ChangeEvent<HTMLInputElement>)
+                }
+              />
             </div>
             <label className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
               <input
