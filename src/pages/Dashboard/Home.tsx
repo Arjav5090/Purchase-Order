@@ -135,66 +135,19 @@ export default function Home() {
     pmName: 18,
     pmSignature: 22,
     approvedBy: 20,
-    rightBottomNotes: 75,
+    rightBottomNotes: 40,
+    jobTask: 45,
   };
 
-  // const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
+  const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
 
-  // const [vendorDetails, setVendorDetails] = useState<
-  //   {
-  //     vendor: string;
-  //     address1: string;
-  //   }[]
-  // >([
-  //   {
-  //     vendor: "Vendor 1",
-  //     address1:
-  //       "1234 Westwood Drive, Apt 502, Sunset Park Brooklyn, New York 11220, USA",
-  //   },
-  //   {
-  //     vendor: "Vendor 2",
-  //     address1:
-  //       "5678 Elm Street, Apt 101, Sunset Park Brooklyn, New York 11220, USA",
-  //   },
-  //   {
-  //     vendor: "Vendor 3",
-  //     address1:
-  //       "91011 Maple Avenue, Apt 202, Sunset Park Brooklyn, New York 11220, USA",
-  //   },
-  //   {
-  //     vendor: "Vendor 4",
-  //     address1:
-  //       "1213 Oak Lane, Apt 303, Sunset Park Brooklyn, New York 11220, USA",
-  //   },
-  // ]);
+  const [vendorDetails, setVendorDetails] = useState<
 
+  
   const jobDetails: {
     jobOrEquip: string;
     jobName: string;
   }[] = [
-    {
-      jobOrEquip: "20-1209",
-      jobName: "Burn",
-    },
-    { jobOrEquip: "20-1242", jobName: "East 25th" },
-    { jobOrEquip: "21-1545", jobName: "HL-45 & HL 46" },
-    {
-      jobOrEquip: "22-152",
-      jobName: "Water Main",
-    },
-    {
-      jobOrEquip: "22-197",
-      jobName: "Jernee Mill",
-    },
-    { jobOrEquip: "22-225", jobName: "Coles" },
-    {
-      jobOrEquip: "22-231",
-      jobName: "Gravesite",
-    },
-    {
-      jobOrEquip: "22-252",
-      jobName: "Little Falls",
-    },
     {
       jobOrEquip: "22-304",
       jobName: "Thornall",
@@ -606,7 +559,26 @@ export default function Home() {
       return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
     }
 
-    drawWrappedText(formattedDate(formData.date), 78, 703, 180);
+    formData.time1 = convertToAmPm(formData.time1);
+    formData.time2 = convertToAmPm(formData.time2);
+    formData.time3 = convertToAmPm(formData.time3);
+    formData.time4 = convertToAmPm(formData.time4);
+    formData.rightTime = convertToAmPm(formData.rightTime);
+
+    formData.date = formData.date ? formatDateToDMY(formData.date) : "";
+    formData.date1 = formData.date1 ? formatDateToDMY(formData.date1) : "";
+    formData.date2 = formData.date2 ? formatDateToDMY(formData.date2) : "";
+    formData.date3 = formData.date3 ? formatDateToDMY(formData.date3) : "";
+    formData.date4 = formData.date4 ? formatDateToDMY(formData.date4) : "";
+    formData.approvedDate = formData.approvedDate
+      ? formatDateToDMY(formData.approvedDate)
+      : "";
+    formData.signDate = formData.signDate
+      ? formatDateToDMY(formData.signDate)
+      : "";
+
+    draw(formData.date, 78, 703);
+
     draw(formData.vendor, 78, 688);
     // draw(formData.address1, 78, 673);
     drawWrappedText(formData.address1, 78, 673, 180);
@@ -1394,18 +1366,7 @@ export default function Home() {
             >
               Vendor
             </label>
-
-            <input
-              type="text"
-              id="vendor"
-              value={formData.vendor}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, vendor: e.target.value }))
-              }
-              placeholder="Enter vendor name"
-              className="h-11 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-            />
-            {/* <Select
+            <Select
               placeholder="Select a vendor"
               value={formData.vendor} // Control the Select with formData.vendor
               options={[
@@ -1441,9 +1402,10 @@ export default function Home() {
                   }));
                 }
               }}
-            /> */}
+            />
 
-            {/* <Modal
+            <Modal
+
               isOpen={isAddVendorModalOpen}
               onClose={() => {
                 setIsAddVendorModalOpen(false);
@@ -1478,7 +1440,7 @@ export default function Home() {
                   setIsAddVendorModalOpen(false);
                 }}
               />
-            </Modal> */}
+            </Modal>
           </div>
 
           <div className="flex flex-col space-y-1.5">
