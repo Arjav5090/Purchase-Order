@@ -3,6 +3,7 @@ import PageMeta from "../../components/common/PageMeta";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import Input from "../../components/form/input/InputField";
 import Select from "../../components/form/Select";
+
 // import { Modal } from "../../components/ui/modal";
 // import AddVendorModalContent from "./Modal";
 // import { format, parse } from 'date-fns';
@@ -801,7 +802,7 @@ export default function Home() {
       ); // Description can still wrap
 
       drawShrinkToFit(item.quantity, 245, currentY, 20);
-      drawShrinkToFit(item.um, 275, currentY, 20);
+      drawShrinkToFit(item.um, 276, currentY, 15);
       drawShrinkToFit(formatUSD(item.unitCost), 294, currentY, 35);
       drawShrinkToFit(formatUSD(item.total), 334, currentY, 35);
 
@@ -1297,17 +1298,41 @@ export default function Home() {
       });
     }
 
-    if (formData.vendorQuoteYes && uploadedQuotePdf) {
-      const quoteBytes = await uploadedQuotePdf.arrayBuffer();
-      const quotePdf = await PDFDocument.load(quoteBytes);
-      const quotePages = await pdfDoc.copyPages(
-        quotePdf,
-        quotePdf.getPageIndices()
-      );
-
-      quotePages.forEach((page) => {
-        pdfDoc.addPage(page);
-      });
+    if (formData.vendorQuoteYes && uploadedFiles.length > 0) {
+      for (const file of uploadedFiles) {
+        const fileType = file.type;
+    
+        if (fileType === 'application/pdf') {
+          const fileBytes = await file.arrayBuffer();
+          const filePdf = await PDFDocument.load(fileBytes);
+          const pages = await pdfDoc.copyPages(filePdf, filePdf.getPageIndices());
+          pages.forEach((page) => {
+            pdfDoc.addPage(page);
+          });
+        } else if (fileType.startsWith('image/')) {
+          const imageBytes = await file.arrayBuffer();
+          let embeddedImage;
+    
+          if (fileType === 'image/png') {
+            embeddedImage = await pdfDoc.embedPng(imageBytes);
+          } else if (fileType === 'image/jpeg') {
+            embeddedImage = await pdfDoc.embedJpg(imageBytes);
+          }
+    
+          if (embeddedImage) {
+            const page = pdfDoc.addPage();
+            const { width, height } = embeddedImage.scale(0.5);
+            page.drawImage(embeddedImage, {
+              x: 50,
+              y: page.getHeight() - height - 50,
+              width,
+              height,
+            });
+          }
+        } else {
+          console.warn(`Unsupported file type: ${fileType}`);
+        }
+      }
     }
 
     form.flatten();
@@ -1316,7 +1341,8 @@ export default function Home() {
     downloadBlob(blob, "PurchaseOrder.pdf");
   };
 
-  const [uploadedQuotePdf, setUploadedQuotePdf] = useState<File | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+ 
   function formatPhone(value: string = "") {
     const digits = value.replace(/\D/g, "").slice(0, 10);
 
@@ -2189,78 +2215,95 @@ export default function Home() {
           </div>
 
           <div className="col-span-2 flex gap-6">
-            <label className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
-              <input
-                type="checkbox"
-                name="vendorQuoteYes"
-                checked={formData.vendorQuoteYes}
-                onChange={() =>
-                  setFormData({
-                    ...formData,
-                    vendorQuoteYes: true,
-                    vendorQuoteNo: false,
-                  })
-                }
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-              />
-              <span>Vendor Quote: Yes</span>
-            </label>
+  <label className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
+    <input
+      type="checkbox"
+      name="vendorQuoteYes"
+      checked={formData.vendorQuoteYes}
+      onChange={() =>
+        setFormData({
+          ...formData,
+          vendorQuoteYes: true,
+          vendorQuoteNo: false,
+        })
+      }
+      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+    />
+    <span>Vendor Quote: Yes</span>
+  </label>
 
-            <label className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
-              <input
-                type="checkbox"
-                name="vendorQuoteNo"
-                checked={formData.vendorQuoteNo}
-                onChange={() =>
-                  setFormData({
-                    ...formData,
-                    vendorQuoteYes: false,
-                    vendorQuoteNo: true,
-                  })
-                }
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-              />
-              <span>Vendor Quote: No</span>
-            </label>
-          </div>
-          {formData.vendorQuoteYes && (
-            <div
-              className="col-span-2 p-4 border-2 border-dashed border-gray-400 rounded text-center cursor-pointer hover:bg-gray-50"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const file = e.dataTransfer.files[0];
-                if (file && file.type === "application/pdf") {
-                  setUploadedQuotePdf(file);
-                } else {
-                  alert("Please drop a valid PDF file.");
-                }
-              }}
-              onClick={() => document.getElementById("quoteUpload")?.click()}
-            >
-              <input
-                type="file"
-                id="quoteUpload"
-                accept="application/pdf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file && file.type === "application/pdf") {
-                    setUploadedQuotePdf(file);
-                  } else {
-                    alert("Please select a valid PDF file.");
-                  }
-                }}
-              />
-              {uploadedQuotePdf ? (
-                <p className="text-green-600 font-medium">
-                  {uploadedQuotePdf.name} uploaded ✅
-                </p>
-              ) : (
-                <p>📄 Drag & drop or click to upload vendor quote PDF</p>
-              )}
-            </div>
-          )}
+  <label className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
+    <input
+      type="checkbox"
+      name="vendorQuoteNo"
+      checked={formData.vendorQuoteNo}
+      onChange={() =>
+        setFormData({
+          ...formData,
+          vendorQuoteYes: false,
+          vendorQuoteNo: true,
+        })
+      }
+      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+    />
+    <span>Vendor Quote: No</span>
+  </label>
+</div>
+
+{formData.vendorQuoteYes && (
+  <div
+    className="col-span-2 p-4 border-2 border-dashed border-gray-400 rounded text-center cursor-pointer hover:bg-gray-50"
+    onDragOver={(e) => e.preventDefault()}
+    onDrop={(e) => {
+      e.preventDefault();
+      const droppedFiles = Array.from(e.dataTransfer.files).filter(
+        (file) =>
+          file.type === "application/pdf" ||
+          file.type === "image/png" ||
+          file.type === "image/jpeg"
+      );
+    
+      if (droppedFiles.length) {
+        setUploadedFiles((prev) => [...prev, ...droppedFiles]);
+      } else {
+        alert("Please drop valid PDF or image files.");
+      }
+    }}
+    
+    onClick={() => document.getElementById("quoteUpload")?.click()}
+  >
+    <input
+      type="file"
+      id="quoteUpload"
+      multiple
+      accept=".pdf,.docx,image/png,image/jpeg"
+      className="hidden"
+      onChange={(e) => {
+        const files = e.target.files;
+        if (files) {
+          const validFiles = Array.from(files).filter(
+            (file) =>
+              file.type === "application/pdf" ||
+              file.type === "image/png" ||
+              file.type === "image/jpeg"
+          );
+          setUploadedFiles((prev) => [...prev, ...validFiles]);
+        }
+      }}
+      
+    />
+    {uploadedFiles.length > 0 ? (
+      <div className="text-green-600 font-medium space-y-1">
+        {uploadedFiles.map((file, idx) => (
+          <p key={idx}>{file.name} uploaded ✅</p>
+        ))}
+      </div>
+    ) : (
+      <p>📄 Drag & drop or click to upload vendor quote files (PDF, PNG, JPG)</p>
+    )}
+  </div>
+)}
+
 
           <div className="flex flex-col space-y-1.5">
             <LimitedInput
