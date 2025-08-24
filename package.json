@@ -3,7 +3,7 @@
   "private": true,
   "version": "2.0.1",
   "type": "module",
-  "homepage": "http://po.gradeconstruction.net/",
+  "homepage": "https://Arjav5090.github.io/Purchase-Order",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
